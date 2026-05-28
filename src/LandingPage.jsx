@@ -4,6 +4,7 @@ import { Float, Environment, ContactShadows } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import { Bot, Zap, Clock, ArrowRight } from 'lucide-react';
 import * as THREE from 'three';
+import ColorBackground from './ColorBackground';
 
 // 3D Interactive Node
 function AbstractNode() {
@@ -45,7 +46,8 @@ function AbstractNode() {
 
 export default function LandingPage({ onGetStarted }) {
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', background: '#09090b', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: 'transparent' }}>
+      <ColorBackground />
       
       {/* 3D Canvas Background */}
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import LandingPage from './LandingPage';
-import AuthBackground from './AuthBackground';
+import ColorBackground from './ColorBackground';
 import './index.css';
 const API_BASE_URL = 'https://whatsapp-agent-3es5.onrender.com/api';
 
@@ -200,7 +200,7 @@ function LoginScreen() {
 
   return (
     <div className="login-container" style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }}>
-      <AuthBackground />
+      <ColorBackground />
       <div className="glass-panel login-card animate-fade-in" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '560px' }}>
         
         {/* Provisioning spinner */}
