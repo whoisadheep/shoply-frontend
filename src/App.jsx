@@ -1493,6 +1493,36 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             </div>
 
             <form onSubmit={handleSubmit}>
+              
+              {/* Feature Toggles */}
+              <div className="glass-panel" style={{ marginBottom: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Feature Controls</h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '1rem' }}>Shoply AI Assistant</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Automatically read and reply to incoming customer messages.</div>
+                    </div>
+                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.ai_enabled !== false ? 'var(--primary-color)' : 'var(--bg-card-hover)', borderRadius: '13px', transition: 'all 0.3s' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: formData.ai_enabled !== false ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s' }}></div>
+                      <input type="checkbox" name="ai_enabled" checked={formData.ai_enabled !== false} onChange={(e) => setFormData(prev => ({ ...prev, ai_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
+                    </div>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '1rem' }}>Ringl Auto-Reply (Missed Calls)</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Send automatic WhatsApp follow-ups when you miss a phone call.</div>
+                    </div>
+                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.ringl_enabled !== false ? 'var(--primary-color)' : 'var(--bg-card-hover)', borderRadius: '13px', transition: 'all 0.3s' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: formData.ringl_enabled !== false ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s' }}></div>
+                      <input type="checkbox" name="ringl_enabled" checked={formData.ringl_enabled !== false} onChange={(e) => setFormData(prev => ({ ...prev, ringl_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div className="grid">
                 <div className="form-group">
                   <label className="form-label">Business Name</label>
