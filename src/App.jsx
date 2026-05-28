@@ -199,9 +199,9 @@ function LoginScreen({ onBack }) {
   };
 
   return (
-    <div className="login-container" style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }}>
+    <div className="login-container" style={{ position: 'relative', overflowY: 'auto', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '4rem 2rem' }}>
       <MeshBackground />
-      <div className="glass-panel login-card animate-fade-in" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '560px' }}>
+      <div className="glass-panel login-card animate-fade-in" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '560px', margin: 'auto' }}>
         
         {/* Provisioning spinner */}
         {step === 'provisioning' && (
