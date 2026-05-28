@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import LeadsView from './components/LeadsView';
-import BroadcastView from './components/BroadcastView';
-import KnowledgeBaseView from './components/KnowledgeBaseView';
-import AnalyticsView from './components/AnalyticsView';
-import SettingsView from './components/SettingsView';
-import SubscriptionStatus from './components/SubscriptionStatus';
 import PricingModal from './components/PricingModal';
 import LandingPage from './LandingPage';
 import MeshBackground from './MeshBackground';
