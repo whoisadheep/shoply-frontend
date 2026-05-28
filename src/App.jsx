@@ -369,22 +369,80 @@ function Dashboard({ session }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saveStatus, setSaveStatus] = useState('');
+  const [subscription, setSubscription] = useState(null);
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
-    fetchTenants();
+    fetchData();
   }, []);
 
-  const fetchTenants = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await apiFetch(`${API_BASE_URL}/tenants`);
-      if (!response.ok) throw new Error('Failed to fetch tenants');
-      const data = await response.json();
+      const [tenantsRes, subRes] = await Promise.all([
+        apiFetch(`${API_BASE_URL}/tenants`),
+        apiFetch(`${API_BASE_URL}/payments/status`)
+      ]);
+      
+      if (!tenantsRes.ok) throw new Error('Failed to fetch tenants');
+      const data = await tenantsRes.json();
       setTenants(data);
+
+      if (subRes.ok) {
+        const subData = await subRes.json();
+        setSubscription(subData);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    setSubscribing(true);
+    try {
+      const res = await apiFetch(`${API_BASE_URL}/payments/create-subscription`, { method: 'POST' });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Failed to initialize payment');
+
+      const options = {
+        key: data.key_id,
+        subscription_id: data.subscription_id,
+        name: "Shoply AI",
+        description: "Unlimited AI Receptionist",
+        handler: async function (response) {
+          try {
+            const verifyRes = await apiFetch(`${API_BASE_URL}/payments/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_subscription_id: response.razorpay_subscription_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            if (verifyRes.ok) {
+              setSubscription(prev => ({ ...prev, subscription_status: 'active' }));
+              alert('Subscription successful! Your AI is fully unlocked.');
+            } else {
+              alert('Payment verification failed.');
+            }
+          } catch (err) {
+            alert('Error verifying payment.');
+          }
+        },
+        prefill: { email: session?.user?.email || '' },
+        theme: { color: "#ec4899" }
+      };
+      
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSubscribing(false);
     }
   };
 
@@ -425,9 +483,31 @@ function Dashboard({ session }) {
   return (
     <div className="container">
       <header className="header animate-fade-in">
-        <div>
-          <h1>Shoply AI <span style={{ color: 'var(--accent-color)' }}>Manager</span></h1>
-          <p>Logged in as <strong>{session.user.email}</strong></p>
+        <div style={{ width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1>Shoply AI <span style={{ color: 'var(--accent-color)' }}>Manager</span></h1>
+              <p>Logged in as <strong>{session.user.email}</strong></p>
+            </div>
+            {subscription && subscription.subscription_status !== 'active' && (
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSubscribe}
+                disabled={subscribing}
+                style={{ background: 'linear-gradient(45deg, #ec4899, #8b5cf6)', border: 'none' }}
+              >
+                {subscribing ? 'Loading...' : 'Subscribe for ₹299/mo'}
+              </button>
+            )}
+          </div>
+
+          {subscription && subscription.subscription_status !== 'active' && (
+            <div style={{ marginTop: '1rem', background: 'rgba(236,72,153,0.1)', border: '1px solid rgba(236,72,153,0.2)', padding: '0.75rem 1rem', borderRadius: '8px', color: '#fbcfe8', fontSize: '0.9rem' }}>
+              {new Date(subscription.trial_ends_at) > new Date() 
+                ? `You are on a Free Trial. It expires on ${new Date(subscription.trial_ends_at).toLocaleDateString()}. Subscribe to prevent interruption.` 
+                : 'Your Free Trial has Expired! AI responses are paused until you subscribe.'}
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           {selectedTenant ? (
