@@ -34,8 +34,8 @@ export default function LandingPage({ onGetStarted }) {
         </motion.nav>
 
         {/* Hero Section */}
-        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 2rem' }}>
-          <div className="landing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', maxWidth: '1200px', width: '100%', alignItems: 'center' }}>
+        <main className="landing-main">
+          <div className="landing-grid">
             
             {/* Left Copy */}
             <motion.div 
@@ -44,14 +44,14 @@ export default function LandingPage({ onGetStarted }) {
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(236, 72, 153, 0.1)', border: '1px solid rgba(236, 72, 153, 0.3)', borderRadius: '20px', color: '#fbcfe8', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1.5rem' }}>
+              <div className="landing-badge">
                 <Zap size={14} fill="#ec4899" color="#ec4899" /> v2.0 Now Live
               </div>
               
-              <h1 style={{ fontSize: '4rem', lineHeight: 1.1, fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
+              <h1 className="landing-title">
                 The AI Receptionist for your WhatsApp.
               </h1>
-              <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)', marginBottom: '2.5rem', lineHeight: 1.6, maxWidth: '500px' }}>
+              <p className="landing-subtitle">
                 Never miss a customer inquiry again. Shoply automatically replies to messages, captures leads, and answers FAQs 24/7.
               </p>
               
@@ -64,7 +64,7 @@ export default function LandingPage({ onGetStarted }) {
                 Get Started for Free <ArrowRight size={20} />
               </button>
 
-              <div style={{ marginTop: '3rem', display: 'flex', gap: '2rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+              <div className="landing-perks">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={16} /> 60-second setup</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={16} /> No credit card</span>
               </div>
@@ -72,25 +72,13 @@ export default function LandingPage({ onGetStarted }) {
 
             {/* Right 2D Floating Visual */}
             <motion.div 
+              className="landing-visual"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-              style={{ position: 'relative', width: '100%', height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
               {/* Glass Mockup Card */}
-              <div style={{
-                width: '380px',
-                height: '480px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '24px',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                backdropFilter: 'blur(20px)',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                position: 'relative'
-              }}>
+              <div className="landing-mockup-card">
                 {/* Header */}
                 <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -133,9 +121,9 @@ export default function LandingPage({ onGetStarted }) {
               
               {/* Floating aesthetic elements */}
               <motion.div 
+                className="floating-aesthetic-badge"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                style={{ position: 'absolute', top: '10%', right: '-5%', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', padding: '10px 15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}
               >
                 <Clock size={16} color="#3b82f6" /> 24/7 Replies
               </motion.div>
