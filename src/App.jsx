@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
+import LeadsView from './components/LeadsView';
+import BroadcastView from './components/BroadcastView';
+import KnowledgeBaseView from './components/KnowledgeBaseView';
+import AnalyticsView from './components/AnalyticsView';
+import SettingsView from './components/SettingsView';
+import SubscriptionStatus from './components/SubscriptionStatus';
+import PricingModal from './components/PricingModal';
 import LandingPage from './LandingPage';
 import MeshBackground from './MeshBackground';
 import './index.css';
@@ -397,6 +404,7 @@ function Dashboard({ session }) {
   const [saveStatus, setSaveStatus] = useState('');
   const [subscription, setSubscription] = useState(null);
   const [subscribing, setSubscribing] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -425,10 +433,14 @@ function Dashboard({ session }) {
     }
   };
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (tier) => {
     setSubscribing(true);
     try {
-      const res = await apiFetch(`${API_BASE_URL}/payments/create-subscription`, { method: 'POST' });
+      const res = await apiFetch(`${API_BASE_URL}/payments/create-subscription`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier })
+      });
       const data = await res.json();
       
       if (!res.ok) throw new Error(data.error || 'Failed to initialize payment');
@@ -436,8 +448,8 @@ function Dashboard({ session }) {
       const options = {
         key: data.key_id,
         subscription_id: data.subscription_id,
-        name: "Shoply AI",
-        description: "Unlimited AI Receptionist",
+        name: "Shoply Subscriptions",
+        description: "Monthly Plan",
         handler: async function (response) {
           try {
             const verifyRes = await apiFetch(`${API_BASE_URL}/payments/verify`, {
@@ -591,10 +603,10 @@ function Dashboard({ session }) {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Subscribe to keep your AI assistant running uninterrupted.</p>
               </div>
             </div>
-            <button className="btn-subscribe" onClick={handleSubscribe} disabled={subscribing} style={{
+            <button className="btn-subscribe" onClick={() => setShowPricingModal(true)} disabled={subscribing} style={{
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               opacity: subscribing ? 0.7 : 1
-            }}>{subscribing ? 'Loading...' : 'Subscribe · ₹299/mo'}</button>
+            }}>{subscribing ? 'Loading...' : 'Upgrade Plan'}</button>
           </div>
         )}
 
@@ -609,10 +621,10 @@ function Dashboard({ session }) {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Your AI responses are paused. Subscribe to reactivate instantly.</p>
               </div>
             </div>
-            <button className="btn-subscribe" onClick={handleSubscribe} disabled={subscribing} style={{
+            <button className="btn-subscribe" onClick={() => setShowPricingModal(true)} disabled={subscribing} style={{
               background: 'linear-gradient(135deg, #ef4444, #dc2626)',
               opacity: subscribing ? 0.7 : 1
-            }}>{subscribing ? 'Loading...' : 'Subscribe · ₹299/mo'}</button>
+            }}>{subscribing ? 'Loading...' : 'Upgrade Plan'}</button>
           </div>
         )}
 
@@ -630,6 +642,19 @@ function Dashboard({ session }) {
           <AddBusinessModal
             onClose={() => setShowAddModal(false)}
             onCreated={handleBusinessCreated}
+          />
+        )}
+        
+        {/* Pricing Modal */}
+        {showPricingModal && (
+          <PricingModal 
+            onClose={() => setShowPricingModal(false)}
+            onSubscribe={(tier) => {
+              setShowPricingModal(false);
+              handleSubscribe(tier);
+            }}
+            subscribing={subscribing}
+            currentTier={subscription?.subscription_tier || 'none'}
           />
         )}
 
