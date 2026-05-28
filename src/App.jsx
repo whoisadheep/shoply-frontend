@@ -649,20 +649,21 @@ function Dashboard({ session }) {
           /* Empty State */
           <div className="animate-fade-in" style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: '5rem 2rem', textAlign: 'center'
+            padding: '6rem 2rem', textAlign: 'center'
           }}>
             <div style={{
-              width: '80px', height: '80px', borderRadius: '20px',
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))',
-              border: '1px solid rgba(99,102,241,0.15)',
+              width: '90px', height: '90px', borderRadius: '24px',
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(236,72,153,0.15))',
+              border: '1px solid rgba(236,72,153,0.2)',
+              boxShadow: '0 10px 30px -10px rgba(236,72,153,0.3)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2rem', marginBottom: '1.5rem'
-            }}>🤖</div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 600, marginBottom: '0.5rem' }}>No businesses yet</h2>
-            <p style={{ color: 'var(--text-secondary)', maxWidth: '380px', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+              fontSize: '2.5rem', marginBottom: '1.5rem'
+            }}>🚀</div>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.75rem', color: '#fff' }}>No businesses yet</h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '1rem', marginBottom: '2rem', lineHeight: '1.6' }}>
               Add your first business and we'll set up an AI-powered WhatsApp receptionist in under 2 minutes.
             </p>
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ padding: '10px 24px', fontSize: '0.9rem', borderRadius: '10px' }}>
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ padding: '12px 28px', fontSize: '1rem', borderRadius: '12px' }}>
               + Add Your First Business
             </button>
           </div>
@@ -686,7 +687,7 @@ function TenantsList({ tenants, onSelect }) {
       {tenants.map((tenant, idx) => (
         <div 
           key={tenant.id} 
-          className="glass-panel animate-fade-in"
+          className="glass-panel hover-lift animate-fade-in"
           style={{ animationDelay: `${idx * 0.1}s` }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
