@@ -580,44 +580,38 @@ function Dashboard({ session }) {
         
         {/* Subscription Banner */}
         {isTrialActive && (
-          <div className="animate-fade-in" style={{
+          <div className="animate-fade-in subscription-banner" style={{
             background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08))',
-            border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px',
-            padding: '1rem 1.25rem', marginBottom: '1.5rem',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem'
+            border: '1px solid rgba(99,102,241,0.2)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="subscription-banner-text">
               <span style={{ fontSize: '1.2rem' }}>✨</span>
               <div>
                 <p style={{ color: '#c4b5fd', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Free Trial · {daysLeft} day{daysLeft !== 1 ? 's' : ''} left</p>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Subscribe to keep your AI assistant running uninterrupted.</p>
               </div>
             </div>
-            <button onClick={handleSubscribe} disabled={subscribing} style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '8px',
-              color: '#fff', fontWeight: 600, fontSize: '0.8rem', padding: '8px 18px', cursor: 'pointer',
-              transition: 'transform 0.15s ease, opacity 0.15s ease', opacity: subscribing ? 0.7 : 1
+            <button className="btn-subscribe" onClick={handleSubscribe} disabled={subscribing} style={{
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              opacity: subscribing ? 0.7 : 1
             }}>{subscribing ? 'Loading...' : 'Subscribe · ₹299/mo'}</button>
           </div>
         )}
 
         {isTrialExpired && (
-          <div className="animate-fade-in" style={{
-            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
-            borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1.5rem',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem'
+          <div className="animate-fade-in subscription-banner" style={{
+            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div className="subscription-banner-text">
               <span style={{ fontSize: '1.2rem' }}>⏸️</span>
               <div>
                 <p style={{ color: '#fca5a5', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Trial Expired</p>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Your AI responses are paused. Subscribe to reactivate instantly.</p>
               </div>
             </div>
-            <button onClick={handleSubscribe} disabled={subscribing} style={{
-              background: 'linear-gradient(135deg, #ef4444, #dc2626)', border: 'none', borderRadius: '8px',
-              color: '#fff', fontWeight: 600, fontSize: '0.8rem', padding: '8px 18px', cursor: 'pointer',
-              transition: 'transform 0.15s ease'
+            <button className="btn-subscribe" onClick={handleSubscribe} disabled={subscribing} style={{
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              opacity: subscribing ? 0.7 : 1
             }}>{subscribing ? 'Loading...' : 'Subscribe · ₹299/mo'}</button>
           </div>
         )}
@@ -1147,7 +1141,7 @@ function KnowledgeBaseView({ tenant }) {
 
   return (
     <div className="glass-panel">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className="panel-header">
         <div>
           <h2 style={{ marginBottom: '0.25rem' }}>Knowledge Base</h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Upload PDFs or Text files to give your AI specific knowledge.</p>
