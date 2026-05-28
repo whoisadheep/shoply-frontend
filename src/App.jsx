@@ -54,31 +54,32 @@ function App() {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      if (session) setShowApp(true); // Auto-skip landing page if already logged in
       setAuthLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) setShowApp(true);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!showApp) {
-    return <LandingPage onGetStarted={() => setShowApp(true)} />;
-  }
-
   if (authLoading) {
     return (
-      <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: 'var(--bg-color)' }}>
         <div className="spinner"></div>
       </div>
     );
   }
 
-  if (!session) {
-    return <LoginScreen onBack={() => setShowApp(false)} />;
+  if (!showApp || !session) {
+    if (showApp && !session) {
+      return <LoginScreen onBack={() => setShowApp(false)} />;
+    }
+    return <LandingPage onGetStarted={() => setShowApp(true)} />;
   }
 
   return <Dashboard session={session} />;
@@ -502,73 +503,173 @@ function Dashboard({ session }) {
     await supabase.auth.signOut();
   };
 
-  if (loading) return <div className="container"><p>Loading dashboard...</p></div>;
-  if (error) return <div className="container"><p style={{color: 'var(--danger-color)'}}>Error: {error}</p></div>;
+  const userInitial = (session?.user?.email || '?')[0].toUpperCase();
+  const isTrialActive = subscription && subscription.subscription_status !== 'active' && new Date(subscription.trial_ends_at) > new Date();
+  const isTrialExpired = subscription && subscription.subscription_status !== 'active' && new Date(subscription.trial_ends_at) <= new Date();
+  const daysLeft = isTrialActive ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at) - new Date()) / 86400000)) : 0;
+
+  if (loading) return (
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '1.5rem' }}>
+      <div className="spinner"></div>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>Loading your dashboard...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '1rem', padding: '2rem' }}>
+      <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚠️</div>
+      <h2 style={{ color: '#fff', fontSize: '1.25rem' }}>Something went wrong</h2>
+      <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '400px', fontSize: '0.9rem' }}>{error}</p>
+      <button className="btn btn-primary" onClick={() => { setError(null); fetchData(); }} style={{ marginTop: '0.5rem' }}>Try Again</button>
+    </div>
+  );
 
   return (
-    <div className="container">
-      <header className="header animate-fade-in">
-        <div style={{ width: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h1>Shoply AI <span style={{ color: 'var(--accent-color)' }}>Manager</span></h1>
-              <p>Logged in as <strong>{session.user.email}</strong></p>
-            </div>
-            {subscription && subscription.subscription_status !== 'active' && (
-              <button 
-                className="btn btn-primary" 
-                onClick={handleSubscribe}
-                disabled={subscribing}
-                style={{ background: 'linear-gradient(45deg, #ec4899, #8b5cf6)', border: 'none' }}
-              >
-                {subscribing ? 'Loading...' : 'Subscribe for ₹299/mo'}
-              </button>
-            )}
-          </div>
-
-          {subscription && subscription.subscription_status !== 'active' && (
-            <div style={{ marginTop: '1rem', background: 'rgba(236,72,153,0.1)', border: '1px solid rgba(236,72,153,0.2)', padding: '0.75rem 1rem', borderRadius: '8px', color: '#fbcfe8', fontSize: '0.9rem' }}>
-              {new Date(subscription.trial_ends_at) > new Date() 
-                ? `You are on a Free Trial. It expires on ${new Date(subscription.trial_ends_at).toLocaleDateString()}. Subscribe to prevent interruption.` 
-                : 'Your Free Trial has Expired! AI responses are paused until you subscribe.'}
-            </div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-color)' }}>
+      {/* ── Top Navigation Bar ── */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: 'rgba(9,9,11,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--panel-border)',
+        padding: '0 2rem', height: '64px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {selectedTenant && (
+            <button onClick={() => setSelectedTenant(null)} style={{
+              background: 'none', border: '1px solid var(--panel-border)', borderRadius: '8px',
+              color: 'var(--text-secondary)', cursor: 'pointer', padding: '6px 10px', fontSize: '0.85rem',
+              display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.15s ease'
+            }}
+            onMouseOver={e => e.currentTarget.style.borderColor = '#52525b'}
+            onMouseOut={e => e.currentTarget.style.borderColor = 'var(--panel-border)'}
+            >← Back</button>
           )}
+          <span style={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.03em' }}>
+            Shoply<span style={{ fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>AI</span>
+          </span>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {selectedTenant ? (
-            <button className="btn btn-secondary" onClick={() => setSelectedTenant(null)}>
-              ← Back to Dashboard
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {!selectedTenant && (
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ fontSize: '0.8rem', padding: '6px 14px', borderRadius: '8px' }}>
               + Add Business
             </button>
           )}
-          <button className="btn btn-secondary" onClick={handleLogout} style={{ color: 'var(--danger-color)' }}>
-            Logout
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button onClick={handleLogout} style={{
+              width: '36px', height: '36px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none',
+              color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+            }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.3)'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+            title="Sign Out"
+            >{userInitial}</button>
+          </div>
         </div>
-      </header>
+      </nav>
 
-      {showAddModal && (
-        <AddBusinessModal
-          onClose={() => setShowAddModal(false)}
-          onCreated={handleBusinessCreated}
-        />
-      )}
+      {/* ── Main Content ── */}
+      <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
+        
+        {/* Subscription Banner */}
+        {isTrialActive && (
+          <div className="animate-fade-in" style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08))',
+            border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px',
+            padding: '1rem 1.25rem', marginBottom: '1.5rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>✨</span>
+              <div>
+                <p style={{ color: '#c4b5fd', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Free Trial · {daysLeft} day{daysLeft !== 1 ? 's' : ''} left</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Subscribe to keep your AI assistant running uninterrupted.</p>
+              </div>
+            </div>
+            <button onClick={handleSubscribe} disabled={subscribing} style={{
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '8px',
+              color: '#fff', fontWeight: 600, fontSize: '0.8rem', padding: '8px 18px', cursor: 'pointer',
+              transition: 'transform 0.15s ease, opacity 0.15s ease', opacity: subscribing ? 0.7 : 1
+            }}>{subscribing ? 'Loading...' : 'Subscribe · ₹299/mo'}</button>
+          </div>
+        )}
 
-      {selectedTenant ? (
-        <TenantEditor 
-          tenant={selectedTenant} 
-          onSave={handleSave} 
-          saveStatus={saveStatus} 
-        />
-      ) : (
-        <TenantsList 
-          tenants={tenants} 
-          onSelect={setSelectedTenant} 
-        />
-      )}
+        {isTrialExpired && (
+          <div className="animate-fade-in" style={{
+            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
+            borderRadius: '12px', padding: '1rem 1.25rem', marginBottom: '1.5rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>⏸️</span>
+              <div>
+                <p style={{ color: '#fca5a5', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Trial Expired</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Your AI responses are paused. Subscribe to reactivate instantly.</p>
+              </div>
+            </div>
+            <button onClick={handleSubscribe} disabled={subscribing} style={{
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)', border: 'none', borderRadius: '8px',
+              color: '#fff', fontWeight: 600, fontSize: '0.8rem', padding: '8px 18px', cursor: 'pointer',
+              transition: 'transform 0.15s ease'
+            }}>{subscribing ? 'Loading...' : 'Subscribe · ₹299/mo'}</button>
+          </div>
+        )}
+
+        {/* Page Title */}
+        {!selectedTenant && (
+          <div className="animate-fade-in" style={{ marginBottom: '2rem' }}>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.25rem', letterSpacing: '-0.03em' }}>Your Businesses</h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+              {tenants.length > 0 ? `Managing ${tenants.length} business${tenants.length > 1 ? 'es' : ''}` : 'Get started by adding your first business'}
+            </p>
+          </div>
+        )}
+
+        {showAddModal && (
+          <AddBusinessModal
+            onClose={() => setShowAddModal(false)}
+            onCreated={handleBusinessCreated}
+          />
+        )}
+
+        {selectedTenant ? (
+          <TenantEditor 
+            tenant={selectedTenant} 
+            onSave={handleSave} 
+            saveStatus={saveStatus} 
+          />
+        ) : tenants.length === 0 ? (
+          /* Empty State */
+          <div className="animate-fade-in" style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '5rem 2rem', textAlign: 'center'
+          }}>
+            <div style={{
+              width: '80px', height: '80px', borderRadius: '20px',
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))',
+              border: '1px solid rgba(99,102,241,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '2rem', marginBottom: '1.5rem'
+            }}>🤖</div>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 600, marginBottom: '0.5rem' }}>No businesses yet</h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '380px', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+              Add your first business and we'll set up an AI-powered WhatsApp receptionist in under 2 minutes.
+            </p>
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ padding: '10px 24px', fontSize: '0.9rem', borderRadius: '10px' }}>
+              + Add Your First Business
+            </button>
+          </div>
+        ) : (
+          <TenantsList 
+            tenants={tenants} 
+            onSelect={setSelectedTenant} 
+          />
+        )}
+      </main>
     </div>
   );
 }
