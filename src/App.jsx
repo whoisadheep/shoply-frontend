@@ -136,7 +136,7 @@ function LoginScreen({ onBack }) {
       }
 
       if (!result.data.session) {
-        setError('Sign up successful! Please check your email for a confirmation link to verify your account, then log in.');
+        setStep('verify_email');
         setLoading(false);
         return;
       }
@@ -236,6 +236,25 @@ function LoginScreen({ onBack }) {
             <button className="btn btn-primary" style={{ marginTop: '1rem', padding: '12px 24px' }}
               onClick={() => window.location.reload()}>
               Done — Go to Dashboard
+            </button>
+          </div>
+        )}
+
+        {/* Email Verification Screen */}
+        {step === 'verify_email' && (
+          <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
+            <h2 style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>Check your email!</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: '1.6' }}>
+              We just sent a confirmation link to <strong>{email}</strong>.<br/>
+              Please click the link in that email to activate your account.
+            </p>
+            <button className="btn btn-primary" style={{ padding: '12px 24px' }}
+              onClick={() => {
+                setStep('form');
+                setMode('login');
+              }}>
+              I've verified my email — Login
             </button>
           </div>
         )}
