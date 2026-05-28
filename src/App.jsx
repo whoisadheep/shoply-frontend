@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import LandingPage from './LandingPage';
 import AuthBackground from './AuthBackground';
 import './index.css';
-const API_BASE_URL = 'http://192.168.1.6:3001/api';
+const API_BASE_URL = 'https://whatsapp-agent-3es5.onrender.com/api';
 
 const apiFetch = async (url, options = {}) => {
   const { data: { session } } = await supabase.auth.getSession();
