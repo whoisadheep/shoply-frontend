@@ -8,23 +8,29 @@ const PLAN_DETAILS = {
 
 export default function PricingModal({ onClose, onSubscribe, subscribing, currentTier }) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-[#121212] border border-white/10 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl">
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '1rem', backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease-out'
+    }}>
+      <div style={{
+        backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px',
+        width: '100%', maxWidth: '900px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+      }}>
         {/* Header */}
-        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.02)' }}>
           <div>
-            <h2 className="text-2xl font-semibold text-white">Upgrade Your Plan</h2>
-            <p className="text-gray-400 text-sm mt-1">Choose the perfect plan for your business needs.</p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'white', margin: 0 }}>Upgrade Your Plan</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem', marginBottom: 0 }}>Choose the perfect plan for your business needs.</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.5rem' }}>
+            <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Pricing Cards */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
           {Object.entries(PLAN_DETAILS).map(([tier, details]) => {
             const isCurrent = currentTier === tier;
             const isCombo = tier === 'combo';
@@ -32,27 +38,32 @@ export default function PricingModal({ onClose, onSubscribe, subscribing, curren
             return (
               <div 
                 key={tier} 
-                className={`relative p-6 rounded-xl border flex flex-col ${
-                  isCombo 
-                    ? 'bg-blue-500/10 border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.15)]' 
-                    : 'bg-white/5 border-white/10'
-                }`}
+                style={{
+                  position: 'relative', padding: '1.5rem', borderRadius: '12px', display: 'flex', flexDirection: 'column',
+                  backgroundColor: isCombo ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.02)',
+                  border: isCombo ? '1px solid rgba(59,130,246,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: isCombo ? '0 0 30px rgba(59,130,246,0.15)' : 'none'
+                }}
               >
                 {isCombo && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                  <div style={{
+                    position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)',
+                    background: 'linear-gradient(90deg, #3b82f6, #6366f1)', color: 'white', fontSize: '0.75rem',
+                    fontWeight: 'bold', padding: '4px 12px', borderRadius: '9999px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                  }}>
                     MOST POPULAR
                   </div>
                 )}
                 
-                <h3 className="text-lg font-medium text-white mb-2">{details.name}</h3>
-                <div className="text-3xl font-bold text-white mb-6">
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 500, color: 'white', marginBottom: '0.5rem', marginTop: isCombo ? '0.5rem' : 0 }}>{details.name}</h3>
+                <div style={{ fontSize: '1.875rem', fontWeight: 700, color: 'white', marginBottom: '1.5rem' }}>
                   {details.price}
                 </div>
                 
-                <ul className="space-y-3 mb-8 flex-1">
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: '2rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {details.features.map((feature, i) => (
-                    <li key={i} className="flex items-start text-sm text-gray-300">
-                      <svg className="w-5 h-5 text-green-400 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', fontSize: '0.875rem', color: 'rgba(255,255,255,0.8)' }}>
+                      <svg style={{ width: '20px', height: '20px', color: '#4ade80', marginRight: '0.5rem', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -63,13 +74,14 @@ export default function PricingModal({ onClose, onSubscribe, subscribing, curren
                 <button
                   onClick={() => onSubscribe(tier)}
                   disabled={subscribing || isCurrent}
-                  className={`w-full py-3 rounded-lg font-medium transition-all ${
-                    isCurrent
-                      ? 'bg-white/10 text-gray-400 cursor-not-allowed'
-                      : isCombo
-                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                        : 'bg-white text-black hover:bg-gray-200'
-                  }`}
+                  style={{
+                    width: '100%', padding: '0.75rem', borderRadius: '8px', fontWeight: 600, border: 'none',
+                    cursor: subscribing || isCurrent ? 'not-allowed' : 'pointer',
+                    backgroundColor: isCurrent ? 'rgba(255,255,255,0.1)' : (isCombo ? '#2563eb' : 'white'),
+                    color: isCurrent ? '#9ca3af' : (isCombo ? 'white' : 'black'),
+                    transition: 'all 0.2s ease',
+                    boxShadow: isCombo && !isCurrent ? '0 10px 15px -3px rgba(37,99,235,0.3)' : 'none'
+                  }}
                 >
                   {subscribing ? 'Processing...' : isCurrent ? 'Current Plan' : 'Subscribe Now'}
                 </button>
