@@ -592,6 +592,7 @@ function AddBusinessModal({ onClose, onCreated }) {
     name: '',
     instance_name: '',
     owner_phone: '',
+    review_link: '',
   });
   const [qrData, setQrData] = useState(null);
   const [createdTenant, setCreatedTenant] = useState(null);
@@ -704,6 +705,18 @@ function AddBusinessModal({ onClose, onCreated }) {
                   value={formData.owner_phone} onChange={handleChange}
                   placeholder="e.g. 919876543210"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Google Maps Review Link (optional)</label>
+                <input 
+                  type="text" className="form-control" name="review_link"
+                  value={formData.review_link} onChange={handleChange}
+                  placeholder="https://g.page/r/.../review"
+                />
+                <small style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                  If provided, AI can auto-send this to satisfied customers.
+                </small>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
@@ -1063,6 +1076,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
   const [wizardUpi, setWizardUpi] = useState('');
   const [wizardHours, setWizardHours] = useState('');
   const [wizardPricing, setWizardPricing] = useState('');
+  const [wizardReviewLink, setWizardReviewLink] = useState(tenant?.review_link || '');
   const [wizardLoading, setWizardLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -1104,6 +1118,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
       if (activeCaps.includes('share_upi') && wizardUpi) extraContext += `UPI / Payment Info: ${wizardUpi}\n`;
       if (activeCaps.includes('share_location') && wizardHours) extraContext += `Address & Hours: ${wizardHours}\n`;
       if (activeCaps.includes('share_pricing') && wizardPricing) extraContext += `Pricing Details: ${wizardPricing}\n`;
+      if (activeCaps.includes('ask_for_review') && wizardReviewLink) extraContext += `Google Review Link: ${wizardReviewLink}\n`;
 
       const response = await apiFetch(`${API_BASE_URL}/generate-prompt`, {
         method: 'POST',
@@ -1117,7 +1132,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
       });
       const data = await response.json();
       if (response.ok && data.prompt) {
-        setFormData(prev => ({ ...prev, system_prompt: data.prompt }));
+        setFormData(prev => ({ ...prev, system_prompt: data.prompt, review_link: wizardReviewLink }));
         setShowWizard(false);
       }
     } catch (err) {
@@ -1334,6 +1349,14 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
                     placeholder="e.g. 919876543210"
                   />
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Google Maps Review Link</label>
+                  <input 
+                    type="text" className="form-control" name="review_link"
+                    value={formData.review_link || ''} onChange={handleChange}
+                    placeholder="https://g.page/r/.../review"
+                  />
+                </div>
               </div>
 
               {/* AI Prompt Wizard */}
@@ -1380,6 +1403,12 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
                       <div className="form-group animate-fade-in" style={{ marginTop: '0.5rem' }}>
                         <label className="form-label">Key Pricing / Starting Prices *</label>
                         <textarea className="form-control" value={wizardPricing} onChange={(e) => setWizardPricing(e.target.value)} placeholder="e.g. Consulting fee is ₹500. Product X starts at ₹1200." style={{ minHeight: '60px' }} required />
+                      </div>
+                    )}
+                    {wizardRole.split(',').includes('ask_for_review') && (
+                      <div className="form-group animate-fade-in" style={{ marginTop: '0.5rem' }}>
+                        <label className="form-label">Google Maps Review Link *</label>
+                        <input type="text" className="form-control" value={wizardReviewLink} onChange={(e) => setWizardReviewLink(e.target.value)} placeholder="https://g.page/r/.../review" required />
                       </div>
                     )}
                     <button type="button" className="btn btn-primary" onClick={generatePrompt} disabled={wizardLoading || !wizardDesc.trim()}>
