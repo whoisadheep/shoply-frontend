@@ -1,114 +1,15 @@
-import React, { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Environment, ContactShadows } from '@react-three/drei';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Zap, Clock, ArrowRight } from 'lucide-react';
-import * as THREE from 'three';
-import ColorBackground from './ColorBackground';
-
-// 3D Interactive Node
-function AbstractNode() {
-  const meshRef = useRef();
-  const coreRef = useRef();
-  const coreVelocity = useRef(new THREE.Vector3());
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    
-    // Cage rotation
-    meshRef.current.rotation.y = Math.sin(t / 4) / 2;
-    meshRef.current.rotation.x = Math.cos(t / 4) / 2;
-    
-    // Target cage position based on mouse
-    const targetX = state.mouse.x * 2;
-    const targetY = state.mouse.y * 2;
-    
-    // Smoothly move the cage
-    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
-
-    // --- Core Physics (Spring & Collision) ---
-    const stiffness = 0.08; // How hard it pulls towards center
-    const damping = 0.85; // Friction
-
-    // Force pulling core to the center of the cage
-    const forceX = (meshRef.current.position.x - coreRef.current.position.x) * stiffness;
-    const forceY = (meshRef.current.position.y - coreRef.current.position.y) * stiffness;
-    
-    coreVelocity.current.x = (coreVelocity.current.x + forceX) * damping;
-    coreVelocity.current.y = (coreVelocity.current.y + forceY) * damping;
-    
-    coreRef.current.position.x += coreVelocity.current.x;
-    coreRef.current.position.y += coreVelocity.current.y;
-    
-    // Collision with the inner wall of the cage
-    const dx = coreRef.current.position.x - meshRef.current.position.x;
-    const dy = coreRef.current.position.y - meshRef.current.position.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    
-    // Distance before it hits the cage (Cage radius ~2.5, Core radius 1.5, max dist ~0.8)
-    const maxDist = 0.8; 
-    
-    if (dist > maxDist) {
-      // Normalize vector
-      const nx = dx / dist;
-      const ny = dy / dist;
-      
-      // Clamp position to edge
-      coreRef.current.position.x = meshRef.current.position.x + nx * maxDist;
-      coreRef.current.position.y = meshRef.current.position.y + ny * maxDist;
-      
-      // Bounce (reflect velocity with energy loss)
-      const dot = coreVelocity.current.x * nx + coreVelocity.current.y * ny;
-      coreVelocity.current.x -= 1.8 * dot * nx; // Bounce factor
-      coreVelocity.current.y -= 1.8 * dot * ny;
-    }
-  });
-
-  return (
-    <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
-      {/* Outer Cage */}
-      <mesh ref={meshRef}>
-        <icosahedronGeometry args={[2.5, 1]} />
-        <meshPhysicalMaterial 
-          color="#ffffff"
-          roughness={0.1}
-          metalness={0.8}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-          wireframe={true}
-          transparent={true}
-          opacity={0.5}
-        />
-      </mesh>
-      
-      {/* Inner bouncing glowing core */}
-      <mesh ref={coreRef}>
-        <sphereGeometry args={[1.5, 32, 32]} />
-        <meshStandardMaterial color="#ffffff" emissive="#444444" roughness={0.2} metalness={1} />
-      </mesh>
-    </Float>
-  );
-}
+import { Bot, Zap, Clock, ArrowRight, CheckCircle2, MessageSquare } from 'lucide-react';
+import MeshBackground from './MeshBackground';
 
 export default function LandingPage({ onGetStarted }) {
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: 'transparent' }}>
-      <ColorBackground />
+      <MeshBackground />
       
-      {/* 3D Canvas Background */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }}>
-        <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={1} />
-          <AbstractNode />
-          <Environment preset="city" />
-          <ContactShadows position={[0, -3.5, 0]} opacity={0.4} scale={20} blur={2} far={4.5} />
-        </Canvas>
-      </div>
-
-      {/* HTML Overlay */}
-      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', pointerEvents: 'none' }}>
+      {/* HTML Content Overlay */}
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
         
         {/* Navbar */}
         <motion.nav 
@@ -116,86 +17,132 @@ export default function LandingPage({ onGetStarted }) {
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
+          style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', pointerEvents: 'none' }}
         >
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Bot size={28} />
+            <Bot size={28} color="#ec4899" />
             Shoply AI
           </div>
           <button 
             onClick={onGetStarted}
-            style={{ pointerEvents: 'auto', padding: '10px 24px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '30px', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s', backdropFilter: 'blur(10px)' }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            style={{ pointerEvents: 'auto', padding: '10px 24px', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '30px', cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s', backdropFilter: 'blur(10px)' }}
+            onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
           >
-            Dashboard Login
+            Sign In
           </button>
         </motion.nav>
 
         {/* Hero Section */}
-        <main className="hero-container">
-          <div style={{ maxWidth: '600px' }}>
-            <motion.h1 
-              className="hero-title"
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              Hire an AI Receptionist that never sleeps.
-            </motion.h1>
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 2rem' }}>
+          <div className="landing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', maxWidth: '1200px', width: '100%', alignItems: 'center' }}>
             
-            <motion.p 
-              className="hero-subtitle"
+            {/* Left Copy */}
+            <motion.div 
+              className="landing-copy"
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              Connect your business WhatsApp to our AI brain in 60 seconds. It answers FAQs, shares pricing, and collects leads 24/7.
-            </motion.p>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(236, 72, 153, 0.1)', border: '1px solid rgba(236, 72, 153, 0.3)', borderRadius: '20px', color: '#fbcfe8', fontSize: '0.85rem', fontWeight: 600, marginBottom: '1.5rem' }}>
+                <Zap size={14} fill="#ec4899" color="#ec4899" /> v2.0 Now Live
+              </div>
+              
+              <h1 style={{ fontSize: '4rem', lineHeight: 1.1, fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
+                The AI Receptionist for your WhatsApp.
+              </h1>
+              <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)', marginBottom: '2.5rem', lineHeight: 1.6, maxWidth: '500px' }}>
+                Never miss a customer inquiry again. Shoply automatically replies to messages, captures leads, and answers FAQs 24/7.
+              </p>
+              
+              <button 
+                onClick={onGetStarted}
+                style={{ pointerEvents: 'auto', padding: '16px 32px', background: '#ec4899', color: '#fff', border: 'none', borderRadius: '30px', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem', display: 'inline-flex', alignItems: 'center', gap: '10px', transition: 'transform 0.2s, boxShadow 0.2s', boxShadow: '0 10px 25px -5px rgba(236, 72, 153, 0.4)' }}
+                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 15px 30px -5px rgba(236, 72, 153, 0.6)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(236, 72, 153, 0.4)'; }}
+              >
+                Get Started for Free <ArrowRight size={20} />
+              </button>
 
-            <motion.button 
-              initial={{ y: 20, opacity: 0 }}
+              <div style={{ marginTop: '3rem', display: 'flex', gap: '2rem', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={16} /> 60-second setup</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle2 size={16} /> No credit card</span>
+              </div>
+            </motion.div>
+
+            {/* Right 2D Floating Visual */}
+            <motion.div 
+              initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              onClick={onGetStarted}
-              style={{ pointerEvents: 'auto', padding: '16px 32px', background: '#fff', color: '#09090b', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'transform 0.2s' }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+              transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+              style={{ position: 'relative', width: '100%', height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
             >
-              Build your AI Agent <ArrowRight size={20} />
-            </motion.button>
+              {/* Glass Mockup Card */}
+              <div style={{
+                width: '380px',
+                height: '480px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '24px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                backdropFilter: 'blur(20px)',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {/* Header */}
+                <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Bot size={20} color="#fff" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>Shoply AI</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--success-color)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success-color)' }}></div> Online
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Chat Area */}
+                <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {/* Customer Message */}
+                  <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.1)', padding: '12px 16px', borderRadius: '16px', borderBottomLeftRadius: '4px', maxWidth: '85%', fontSize: '0.9rem' }}>
+                    Hi! Are you open today? And do you sell headphones?
+                  </div>
+                  
+                  {/* AI Response */}
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9, originY: 1 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.5, duration: 0.4 }}
+                    style={{ alignSelf: 'flex-end', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', padding: '12px 16px', borderRadius: '16px', borderBottomRightRadius: '4px', maxWidth: '85%', fontSize: '0.9rem', color: '#fff' }}
+                  >
+                    Yes, we're open until 8 PM! We have a wide range of headphones starting at ₹999. Would you like me to send you the catalog?
+                  </motion.div>
+                </div>
+
+                {/* Input area mockup */}
+                <div style={{ padding: '15px 20px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ flex: 1, height: '36px', background: 'rgba(255,255,255,0.05)', borderRadius: '18px' }}></div>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(236,72,153,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MessageSquare size={16} color="#ec4899" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Floating aesthetic elements */}
+              <motion.div 
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                style={{ position: 'absolute', top: '10%', right: '-5%', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', padding: '10px 15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem' }}
+              >
+                <Clock size={16} color="#3b82f6" /> 24/7 Replies
+              </motion.div>
+            </motion.div>
+
           </div>
         </main>
-
-        {/* Features Footer */}
-        <motion.div 
-          className="features-footer"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-        >
-          <div className="feature-item">
-            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}><Zap size={24} color="#a1a1aa" /></div>
-            <div>
-              <div style={{ fontWeight: 600 }}>Setup in Seconds</div>
-              <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Just scan a QR code</div>
-            </div>
-          </div>
-          <div className="feature-item">
-            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}><Clock size={24} color="#a1a1aa" /></div>
-            <div>
-              <div style={{ fontWeight: 600 }}>24/7 Instant Replies</div>
-              <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Never miss a lead</div>
-            </div>
-          </div>
-          <div className="feature-item">
-            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}><Bot size={24} color="#a1a1aa" /></div>
-            <div>
-              <div style={{ fontWeight: 600 }}>Custom Knowledge</div>
-              <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Upload PDFs & FAQs</div>
-            </div>
-          </div>
-        </motion.div>
-
       </div>
     </div>
   );
