@@ -1,75 +1,70 @@
 import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { MeshDistortMaterial, Environment } from '@react-three/drei';
+import { Environment, Float, Sphere, Torus, Icosahedron } from '@react-three/drei';
 import * as THREE from 'three';
 
-function LiquidColorMesh() {
-  const meshRef = useRef();
+const glassMaterialProps = {
+  roughness: 0.1,
+  transmission: 1, // Add transparency
+  thickness: 1.5, // Add refraction
+  envMapIntensity: 2,
+  clearcoat: 1,
+  clearcoatRoughness: 0.1,
+};
 
-  useFrame((state, delta) => {
-    // Slow rotation
-    meshRef.current.rotation.x += delta * 0.1;
-    meshRef.current.rotation.y += delta * 0.15;
-    meshRef.current.rotation.z += delta * 0.05;
+function FloatingShapes() {
+  const group = useRef();
+
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    group.current.rotation.y = Math.sin(t / 10) / 2;
+    group.current.rotation.x = Math.cos(t / 10) / 2;
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0, -2]} scale={6}>
-      <sphereGeometry args={[1, 64, 64]} />
-      <MeshDistortMaterial 
-        color="#3b0764" 
-        emissive="#1e1b4b"
-        roughness={0.1}
-        metalness={0.8}
-        distort={0.4} 
-        speed={1.5} 
-      />
-    </mesh>
-  );
-}
+    <group ref={group}>
+      {/* Pink Glass Sphere */}
+      <Float speed={2} rotationIntensity={1} floatIntensity={2}>
+        <Sphere args={[1.5, 64, 64]} position={[-4, 2, -5]}>
+          <meshPhysicalMaterial {...glassMaterialProps} color="#ec4899" />
+        </Sphere>
+      </Float>
 
-function FloatingBlobs() {
-  const blob1 = useRef();
-  const blob2 = useRef();
+      {/* Blue Glass Donut */}
+      <Float speed={1.5} rotationIntensity={2} floatIntensity={1.5}>
+        <Torus args={[1.2, 0.4, 32, 64]} position={[4, -1, -4]} rotation={[1, 0.5, 0]}>
+          <meshPhysicalMaterial {...glassMaterialProps} color="#3b82f6" />
+        </Torus>
+      </Float>
 
-  useFrame((state, delta) => {
-    blob1.current.rotation.x += delta * 0.2;
-    blob1.current.rotation.y += delta * 0.3;
-    
-    blob2.current.rotation.x -= delta * 0.15;
-    blob2.current.rotation.y -= delta * 0.25;
-  });
+      {/* Purple Glass Icosahedron */}
+      <Float speed={2.5} rotationIntensity={1.5} floatIntensity={2.5}>
+        <Icosahedron args={[1.2, 0]} position={[-2, -3, -3]} rotation={[0, 1, 0]}>
+          <meshPhysicalMaterial {...glassMaterialProps} color="#8b5cf6" />
+        </Icosahedron>
+      </Float>
 
-  return (
-    <>
-      <mesh ref={blob1} position={[-3, 2, -4]} scale={3}>
-        <sphereGeometry args={[1, 64, 64]} />
-        <MeshDistortMaterial color="#4c1d95" roughness={0.2} metalness={0.8} distort={0.5} speed={2} />
-      </mesh>
-      
-      <mesh ref={blob2} position={[3, -2, -3]} scale={4}>
-        <sphereGeometry args={[1, 64, 64]} />
-        <MeshDistortMaterial color="#0f172a" roughness={0.2} metalness={0.8} distort={0.6} speed={1.2} />
-      </mesh>
-    </>
+      {/* Cyan Glass Sphere */}
+      <Float speed={1.8} rotationIntensity={1.2} floatIntensity={1.8}>
+        <Sphere args={[0.8, 64, 64]} position={[3, 3, -6]}>
+          <meshPhysicalMaterial {...glassMaterialProps} color="#06b6d4" />
+        </Sphere>
+      </Float>
+    </group>
   );
 }
 
 export default function ColorBackground() {
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, background: '#000000', pointerEvents: 'none', overflow: 'hidden' }}>
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1.5} color="#c084fc" />
-        <directionalLight position={[-10, -10, -5]} intensity={1} color="#3b82f6" />
-        <pointLight position={[0, 0, 0]} intensity={2} color="#9333ea" />
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, background: '#030712', pointerEvents: 'none', overflow: 'hidden' }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
+        <ambientLight intensity={0.8} />
+        <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
+        <directionalLight position={[-10, -10, -5]} intensity={1} color="#ffffff" />
         
-        <LiquidColorMesh />
-        <FloatingBlobs />
+        <FloatingShapes />
         <Environment preset="city" />
       </Canvas>
-      {/* CSS overlay to blur it out into a smooth gradient */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backdropFilter: 'blur(100px)', zIndex: 1 }} />
     </div>
   );
 }
