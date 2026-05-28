@@ -9,12 +9,14 @@ const PLAN_DETAILS = {
 export default function PricingModal({ onClose, onSubscribe, subscribing, currentTier }) {
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '1rem', backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease-out'
+      position: 'fixed', inset: 0, zIndex: 100, display: 'flex', flexDirection: 'column',
+      padding: '1rem', backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', animation: 'fadeIn 0.2s ease-out',
+      overflowY: 'auto'
     }}>
       <div style={{
         backgroundColor: '#121212', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px',
-        width: '100%', maxWidth: '900px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+        width: '100%', maxWidth: '900px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+        margin: 'auto'
       }}>
         {/* Header */}
         <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.02)' }}>
