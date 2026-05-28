@@ -9,19 +9,65 @@ import ColorBackground from './ColorBackground';
 // 3D Interactive Node
 function AbstractNode() {
   const meshRef = useRef();
+  const coreRef = useRef();
+  const coreVelocity = useRef(new THREE.Vector3());
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    
+    // Cage rotation
     meshRef.current.rotation.y = Math.sin(t / 4) / 2;
     meshRef.current.rotation.x = Math.cos(t / 4) / 2;
     
-    // Slight mouse interaction (parallax)
-    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, (state.mouse.x * 2), 0.05);
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, (state.mouse.y * 2), 0.05);
+    // Target cage position based on mouse
+    const targetX = state.mouse.x * 2;
+    const targetY = state.mouse.y * 2;
+    
+    // Smoothly move the cage
+    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
+    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
+
+    // --- Core Physics (Spring & Collision) ---
+    const stiffness = 0.08; // How hard it pulls towards center
+    const damping = 0.85; // Friction
+
+    // Force pulling core to the center of the cage
+    const forceX = (meshRef.current.position.x - coreRef.current.position.x) * stiffness;
+    const forceY = (meshRef.current.position.y - coreRef.current.position.y) * stiffness;
+    
+    coreVelocity.current.x = (coreVelocity.current.x + forceX) * damping;
+    coreVelocity.current.y = (coreVelocity.current.y + forceY) * damping;
+    
+    coreRef.current.position.x += coreVelocity.current.x;
+    coreRef.current.position.y += coreVelocity.current.y;
+    
+    // Collision with the inner wall of the cage
+    const dx = coreRef.current.position.x - meshRef.current.position.x;
+    const dy = coreRef.current.position.y - meshRef.current.position.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    
+    // Distance before it hits the cage (Cage radius ~2.5, Core radius 1.5, max dist ~0.8)
+    const maxDist = 0.8; 
+    
+    if (dist > maxDist) {
+      // Normalize vector
+      const nx = dx / dist;
+      const ny = dy / dist;
+      
+      // Clamp position to edge
+      coreRef.current.position.x = meshRef.current.position.x + nx * maxDist;
+      coreRef.current.position.y = meshRef.current.position.y + ny * maxDist;
+      
+      // Bounce (reflect velocity with energy loss)
+      const dot = coreVelocity.current.x * nx + coreVelocity.current.y * ny;
+      coreVelocity.current.x -= 1.8 * dot * nx; // Bounce factor
+      coreVelocity.current.y -= 1.8 * dot * ny;
+    }
   });
 
   return (
     <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
+      {/* Outer Cage */}
       <mesh ref={meshRef}>
         <icosahedronGeometry args={[2.5, 1]} />
         <meshPhysicalMaterial 
@@ -35,8 +81,9 @@ function AbstractNode() {
           opacity={0.5}
         />
       </mesh>
-      {/* Inner glowing core */}
-      <mesh>
+      
+      {/* Inner bouncing glowing core */}
+      <mesh ref={coreRef}>
         <sphereGeometry args={[1.5, 32, 32]} />
         <meshStandardMaterial color="#ffffff" emissive="#444444" roughness={0.2} metalness={1} />
       </mesh>
