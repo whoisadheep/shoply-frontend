@@ -5,11 +5,11 @@ import MeshBackground from './MeshBackground';
 
 export default function LandingPage({ onGetStarted }) {
   return (
-    <div style={{ width: '100vw', minHeight: '100vh', overflowX: 'hidden', position: 'relative', background: 'transparent' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: 'transparent' }}>
       <MeshBackground />
       
       {/* HTML Content Overlay */}
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
         
         {/* Navbar */}
         <motion.nav 

@@ -775,40 +775,64 @@ textarea.form-control {
 @media (max-width: 992px) {
   .landing-grid {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 1.5rem;
     text-align: center;
-    padding: 2rem 0;
+    padding: 0;
   }
   
   .landing-title {
-    font-size: 3rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
   }
   
   .landing-subtitle {
-    margin: 0 auto 2.5rem auto;
+    font-size: 1rem;
+    margin: 0 auto 1rem auto;
   }
   
   .landing-perks {
     justify-content: center;
-    margin-top: 2rem;
+    margin-top: 1rem;
   }
   
   .floating-aesthetic-badge {
     right: 5%;
   }
+  
+  .landing-visual {
+    height: auto;
+  }
 }
 
 @media (max-width: 480px) {
   .landing-title {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
+  }
+  
+  .landing-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .landing-badge {
+    margin-bottom: 0.5rem;
   }
   
   .landing-mockup-card {
-    width: 100%;
-    height: 400px;
+    width: 280px;
+    height: 340px;
+    transform: scale(0.9);
   }
   
   .floating-aesthetic-badge {
     display: none;
+  }
+
+  .landing-nav {
+    padding: 1rem !important;
+  }
+  
+  .landing-grid {
+    gap: 1rem;
   }
 }
