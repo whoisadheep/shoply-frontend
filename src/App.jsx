@@ -78,7 +78,7 @@ function App() {
   }
 
   if (!session) {
-    return <LoginScreen />;
+    return <LoginScreen onBack={() => setShowApp(false)} />;
   }
 
   return <Dashboard session={session} />;
@@ -87,7 +87,7 @@ function App() {
 /* ─────────────────────────────────────────────
    Login Screen
    ───────────────────────────────────────────── */
-function LoginScreen() {
+function LoginScreen({ onBack }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
@@ -237,18 +237,20 @@ function LoginScreen() {
         {/* Login / Signup Form */}
         {step === 'form' && (
           <>
-            <div style={{ position: 'relative', textAlign: 'center', marginBottom: '2rem' }}>
-              <button 
-                type="button"
-                onClick={() => setShowApp(false)}
-                style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.9rem', padding: '0.5rem' }}
-              >
-                &larr; Back
-              </button>
-              <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+                <button 
+                  type="button"
+                  onClick={onBack}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.9rem', padding: '0.5rem', marginLeft: '-0.5rem' }}
+                >
+                  &larr; Back to Home
+                </button>
+              </div>
+              <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', textAlign: 'center' }}>
                 Shoply AI <span style={{ color: 'var(--accent-color)' }}>Manager</span>
               </h1>
-              <p>{mode === 'login' ? 'Sign in to manage your AI receptionists' : 'Set up your AI receptionist in 60 seconds'}</p>
+              <p style={{ textAlign: 'center' }}>{mode === 'login' ? 'Sign in to manage your AI receptionists' : 'Set up your AI receptionist in 60 seconds'}</p>
             </div>
 
             {error && <div className="error-banner">{error}</div>}
