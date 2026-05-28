@@ -520,7 +520,10 @@ function Dashboard({ session }) {
       <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚠️</div>
       <h2 style={{ color: '#fff', fontSize: '1.25rem' }}>Something went wrong</h2>
       <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '400px', fontSize: '0.9rem' }}>{error}</p>
-      <button className="btn btn-primary" onClick={() => { setError(null); fetchData(); }} style={{ marginTop: '0.5rem' }}>Try Again</button>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+        <button className="btn btn-primary" onClick={() => { setError(null); fetchData(); }}>Try Again</button>
+        <button className="btn" onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff' }}>Logout / Clear Session</button>
+      </div>
     </div>
   );
 
