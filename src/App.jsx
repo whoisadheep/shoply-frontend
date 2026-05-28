@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import LandingPage from './LandingPage';
 import MeshBackground from './MeshBackground';
 import './index.css';
-const API_BASE_URL = 'https://whatsapp-agent-3es5.onrender.com/api';
+const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:3001/api' : 'https://whatsapp-agent-3es5.onrender.com/api';
 
 const apiFetch = async (url, options = {}) => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -131,6 +131,12 @@ function LoginScreen({ onBack }) {
 
       if (result.data?.user?.identities?.length === 0) {
         setError('This email is already registered. Please login instead.');
+        setLoading(false);
+        return;
+      }
+
+      if (!result.data.session) {
+        setError('Sign up successful! Please check your email for a confirmation link to verify your account, then log in.');
         setLoading(false);
         return;
       }
