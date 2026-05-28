@@ -237,7 +237,14 @@ function LoginScreen() {
         {/* Login / Signup Form */}
         {step === 'form' && (
           <>
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{ position: 'relative', textAlign: 'center', marginBottom: '2rem' }}>
+              <button 
+                type="button"
+                onClick={() => setShowLanding(true)}
+                style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.9rem', padding: '0.5rem' }}
+              >
+                &larr; Back
+              </button>
               <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
                 Shoply AI <span style={{ color: 'var(--accent-color)' }}>Manager</span>
               </h1>
