@@ -872,6 +872,34 @@ textarea.form-control {
   }
 }
 
+/* Components */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.integration-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255,255,255,0.02);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.integration-text {
+  flex: 1;
+}
+
 /* Dashboard Mobile Responsiveness */
 @media (max-width: 768px) {
   .container {
@@ -934,5 +962,31 @@ textarea.form-control {
   }
   table {
     min-width: 600px;
+  }
+  
+  /* Fixes for App.jsx components */
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .panel-header-actions {
+    flex-wrap: wrap;
+  }
+  
+  .integration-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.2rem;
+    gap: 1.2rem;
+  }
+  
+  .integration-text p {
+    font-size: 0.85rem;
+  }
+  
+  .integration-card .btn-primary {
+    width: 100%;
   }
 }

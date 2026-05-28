@@ -1383,9 +1383,9 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             
             {/* WhatsApp Connection Panel */}
             <div className="glass-panel">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div className="panel-header">
                 <h2>WhatsApp Connection</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="panel-header-actions">
                   <span className={`badge ${connectionStatus === 'open' ? 'badge-active' : 'badge-offline'}`}>
                     {connectionStatus === 'open' ? '● Connected' : connectionStatus === 'unknown' ? '● Unknown' : '● Disconnected'}
                   </span>
@@ -1444,12 +1444,12 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             
             {/* Integrations Panel */}
             <div className="glass-panel" style={{ marginTop: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div className="panel-header">
                 <h2>Integrations & Tools</h2>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="integration-card">
                 <div style={{ fontSize: '2rem' }}>📞</div>
-                <div style={{ flex: 1 }}>
+                <div className="integration-text">
                   <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem' }}>Ringl: Missed Call Auto-Reply App</h3>
                   <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Install this Android app on your business phone to automatically detect missed calls and trigger WhatsApp AI replies.</p>
                 </div>
