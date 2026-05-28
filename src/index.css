@@ -871,3 +871,68 @@ textarea.form-control {
     gap: 1rem;
   }
 }
+
+/* Dashboard Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
+  .tabs button {
+    flex: 1 1 calc(50% - 0.5rem);
+    text-align: center;
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+  .glass-panel {
+    padding: 1.2rem;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .metric-card {
+    padding: 1rem;
+  }
+  .metric-value {
+    font-size: 1.5rem;
+  }
+  .header > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+  }
+  .sidebar, .chat-window {
+    width: 100%;
+    height: auto;
+  }
+  .chat-layout {
+    flex-direction: column;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  table {
+    min-width: 600px;
+  }
+}
