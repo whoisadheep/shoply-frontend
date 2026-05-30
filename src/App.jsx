@@ -1520,6 +1520,32 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
                       <input type="checkbox" name="ringl_enabled" checked={formData.ringl_enabled !== false} onChange={(e) => setFormData(prev => ({ ...prev, ringl_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
                     </div>
                   </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '1rem' }}>Strict Safety Guardrail (Self-Healing)</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Uses a secondary AI to block hallucinations and automatically learn from mistakes. <br/><span style={{ color: 'var(--warning-color)', fontSize: '0.75rem' }}>Note: Adds ~2s delay to AI replies.</span></div>
+                    </div>
+                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.guardrail_enabled ? 'var(--primary-color)' : 'var(--bg-card-hover)', borderRadius: '13px', transition: 'all 0.3s' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: formData.guardrail_enabled ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s' }}></div>
+                      <input type="checkbox" name="guardrail_enabled" checked={formData.guardrail_enabled || false} onChange={(e) => setFormData(prev => ({ ...prev, guardrail_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
+                    </div>
+                  </label>
+
+                  {formData.guardrail_enabled && (
+                    <div className="form-group animate-fade-in" style={{ marginTop: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+                      <label className="form-label">AI Lessons Learned (Auto-Generated)</label>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', marginTop: 0 }}>
+                        When the Guardrail catches a mistake, it writes a rule here so the AI never makes it again. You can edit or delete these rules.
+                      </p>
+                      <textarea 
+                        className="form-control" name="learned_rules"
+                        value={formData.learned_rules || ''} onChange={(e) => setFormData(prev => ({ ...prev, learned_rules: e.target.value }))}
+                        style={{ minHeight: '80px', fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(255,255,255,0.1)' }}
+                        placeholder="No rules learned yet..."
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
