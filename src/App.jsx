@@ -1203,6 +1203,197 @@ function KnowledgeBaseView({ tenant }) {
 
 
 /* ─────────────────────────────────────────────
+   Onboarding Tutorial
+   ───────────────────────────────────────────── */
+function OnboardingTutorial({ steps, currentStep, onNext, onPrev, onClose }) {
+  const step = steps[currentStep];
+  const [targetRect, setTargetRect] = React.useState(null);
+
+  React.useEffect(() => {
+    const el = document.querySelector(step.target);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        const rect = el.getBoundingClientRect();
+        setTargetRect(rect);
+      }, 400);
+    } else {
+      setTargetRect(null);
+    }
+  }, [currentStep, step.target]);
+
+  const tooltipStyle = (() => {
+    if (!targetRect) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+    const pad = 16;
+    const tooltipW = 340;
+    // Position below the target by default
+    let top = targetRect.bottom + pad;
+    let left = targetRect.left + targetRect.width / 2 - tooltipW / 2;
+    // If tooltip goes below viewport, position above
+    if (top + 200 > window.innerHeight) {
+      top = targetRect.top - pad - 200;
+    }
+    // Clamp horizontal
+    if (left < pad) left = pad;
+    if (left + tooltipW > window.innerWidth - pad) left = window.innerWidth - pad - tooltipW;
+    return { top: `${top}px`, left: `${left}px` };
+  })();
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 10000 }}>
+      {/* Overlay with cutout */}
+      <svg style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        <defs>
+          <mask id="tour-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            {targetRect && (
+              <rect
+                x={targetRect.left - 8} y={targetRect.top - 8}
+                width={targetRect.width + 16} height={targetRect.height + 16}
+                rx="12" fill="black"
+              />
+            )}
+          </mask>
+        </defs>
+        <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#tour-mask)" />
+      </svg>
+
+      {/* Highlight border */}
+      {targetRect && (
+        <div style={{
+          position: 'fixed',
+          top: targetRect.top - 8, left: targetRect.left - 8,
+          width: targetRect.width + 16, height: targetRect.height + 16,
+          border: '2px solid #6366f1', borderRadius: '12px',
+          boxShadow: '0 0 0 4px rgba(99,102,241,0.3), 0 0 30px rgba(99,102,241,0.2)',
+          pointerEvents: 'none', zIndex: 10001,
+          animation: 'pulse-border 2s ease-in-out infinite'
+        }} />
+      )}
+
+      {/* Click blocker */}
+      <div onClick={(e) => e.stopPropagation()} style={{ position: 'fixed', inset: 0, zIndex: 10001 }} />
+
+      {/* Tooltip */}
+      <div style={{
+        position: 'fixed', ...tooltipStyle, zIndex: 10002,
+        width: '340px', maxWidth: 'calc(100vw - 32px)',
+        background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+        border: '1px solid rgba(99,102,241,0.4)',
+        borderRadius: '16px', padding: '1.5rem',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        animation: 'animate-fade-in 0.3s ease'
+      }}>
+        {/* Step counter */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {steps.map((_, i) => (
+              <div key={i} style={{
+                width: i === currentStep ? '20px' : '8px', height: '4px',
+                borderRadius: '2px', transition: 'all 0.3s',
+                background: i <= currentStep ? '#6366f1' : 'rgba(255,255,255,0.15)'
+              }} />
+            ))}
+          </div>
+          <button onClick={onClose} style={{
+            background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+            cursor: 'pointer', fontSize: '1.2rem', padding: '2px 6px', lineHeight: 1
+          }}>✕</button>
+        </div>
+
+        {/* Icon */}
+        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{step.icon}</div>
+
+        {/* Title */}
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', margin: '0 0 0.5rem 0' }}>{step.title}</h3>
+
+        {/* Description */}
+        <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, margin: '0 0 1.25rem 0' }}>{step.description}</p>
+
+        {/* Navigation */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button
+            onClick={onPrev} disabled={currentStep === 0}
+            style={{
+              background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px',
+              color: currentStep === 0 ? 'rgba(255,255,255,0.2)' : '#fff', padding: '8px 16px',
+              cursor: currentStep === 0 ? 'default' : 'pointer', fontSize: '0.85rem', transition: 'all 0.2s'
+            }}
+          >← Back</button>
+
+          {currentStep < steps.length - 1 ? (
+            <button onClick={onNext} style={{
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '8px',
+              color: '#fff', padding: '8px 20px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+              boxShadow: '0 4px 15px rgba(99,102,241,0.4)', transition: 'all 0.2s'
+            }}>Next →</button>
+          ) : (
+            <button onClick={onClose} style={{
+              background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none', borderRadius: '8px',
+              color: '#fff', padding: '8px 20px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+              boxShadow: '0 4px 15px rgba(34,197,94,0.4)', transition: 'all 0.2s'
+            }}>Got it! ✓</button>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes pulse-border {
+          0%, 100% { box-shadow: 0 0 0 4px rgba(99,102,241,0.3), 0 0 30px rgba(99,102,241,0.15); }
+          50% { box-shadow: 0 0 0 6px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.3); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const TOUR_STEPS = [
+  {
+    target: '[data-tour="tabs"]',
+    icon: '📋',
+    title: 'Dashboard Tabs',
+    description: 'This is your control center. Use these tabs to switch between the Overview, Live Inbox, Knowledge Base, and AI Settings for your business.'
+  },
+  {
+    target: '[data-tour="whatsapp-panel"]',
+    icon: '📱',
+    title: 'Connect WhatsApp',
+    description: 'Click "Get QR Code" and scan it with the WhatsApp Business app on your phone. This links your phone number to the AI receptionist. The AI will start replying automatically once connected!'
+  },
+  {
+    target: '[data-tour="analytics-panel"]',
+    icon: '📊',
+    title: 'Analytics & ROI',
+    description: 'Track how many customers your AI has talked to, how many messages it has sent, and how much time it has saved you. This updates in real-time!'
+  },
+  {
+    target: '[data-tour="integrations-panel"]',
+    icon: '📞',
+    title: 'Ringl: Missed Call Auto-Reply',
+    description: 'Download and install the Ringl APK on your business phone. When you miss a customer call, it will automatically send them a WhatsApp follow-up via your AI.'
+  },
+  {
+    target: '[data-tour="settings-tab"]',
+    icon: '⚙️',
+    title: 'AI Settings',
+    description: 'Click here to configure your AI — set your business name, owner phone, system prompt, and enable features like Guardrail & Missed Call auto-reply.'
+  },
+  {
+    target: '[data-tour="knowledge-tab"]',
+    icon: '📚',
+    title: 'Knowledge Base',
+    description: 'Upload PDFs or text files (menus, price lists, FAQs) so the AI can answer questions using YOUR real data instead of guessing. This dramatically reduces hallucinations!'
+  },
+  {
+    target: '[data-tour="inbox-tab"]',
+    icon: '💬',
+    title: 'Live Inbox',
+    description: 'See every conversation your AI is having in real-time. Monitor what customers are asking and how the AI is responding. You can jump in and take over anytime!'
+  }
+];
+
+
+/* ─────────────────────────────────────────────
    Tenant Editor
    ───────────────────────────────────────────── */
 function TenantEditor({ tenant, onSave, saveStatus }) {
@@ -1223,9 +1414,29 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
   const [wizardLoading, setWizardLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // Tutorial state
+  const [showTour, setShowTour] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Auto-show tutorial for new users (no messages yet / first visit)
+  useEffect(() => {
+    const tourSeen = localStorage.getItem(`tour_seen_${tenant.id}`);
+    if (!tourSeen) {
+      // Small delay so UI renders first
+      const timer = setTimeout(() => setShowTour(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [tenant.id]);
+
+  const closeTour = () => {
+    setShowTour(false);
+    setTourStep(0);
+    localStorage.setItem(`tour_seen_${tenant.id}`, 'true');
   };
 
   const handleSubmit = (e) => {
@@ -1342,11 +1553,32 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
 
-      <div className="tabs">
-        <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>Overview</button>
-        <button className={activeTab === 'inbox' ? 'active' : ''} onClick={() => setActiveTab('inbox')}>Live Inbox</button>
-        <button className={activeTab === 'knowledge' ? 'active' : ''} onClick={() => setActiveTab('knowledge')}>Knowledge Base</button>
-        <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>AI Settings</button>
+      {/* Tutorial */}
+      {showTour && (
+        <OnboardingTutorial
+          steps={TOUR_STEPS}
+          currentStep={tourStep}
+          onNext={() => setTourStep(s => Math.min(s + 1, TOUR_STEPS.length - 1))}
+          onPrev={() => setTourStep(s => Math.max(s - 1, 0))}
+          onClose={closeTour}
+        />
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+        <div className="tabs" data-tour="tabs" style={{ marginBottom: 0 }}>
+          <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>Overview</button>
+          <button data-tour="inbox-tab" className={activeTab === 'inbox' ? 'active' : ''} onClick={() => setActiveTab('inbox')}>Live Inbox</button>
+          <button data-tour="knowledge-tab" className={activeTab === 'knowledge' ? 'active' : ''} onClick={() => setActiveTab('knowledge')}>Knowledge Base</button>
+          <button data-tour="settings-tab" className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>AI Settings</button>
+        </div>
+        <button onClick={() => { setTourStep(0); setShowTour(true); }} style={{
+          background: 'none', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '8px',
+          color: '#a5b4fc', cursor: 'pointer', padding: '5px 12px', fontSize: '0.78rem',
+          display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.2s', whiteSpace: 'nowrap'
+        }}
+        onMouseOver={e => e.currentTarget.style.borderColor = '#6366f1'}
+        onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'}
+        >❓ Tour</button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '0.5rem' }}>
@@ -1358,7 +1590,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
         {activeTab === 'overview' && (
           <>
             {/* Analytics & ROI Panel */}
-            <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(88, 166, 255, 0.05) 0%, rgba(30, 41, 59, 0.5) 100%)', borderColor: 'rgba(88, 166, 255, 0.2)' }}>
+            <div data-tour="analytics-panel" className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(88, 166, 255, 0.05) 0%, rgba(30, 41, 59, 0.5) 100%)', borderColor: 'rgba(88, 166, 255, 0.2)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <h2>Analytics & ROI</h2>
                 <button className="btn btn-secondary" onClick={fetchAnalytics} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
@@ -1395,7 +1627,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             </div>
             
             {/* WhatsApp Connection Panel */}
-            <div className="glass-panel">
+            <div data-tour="whatsapp-panel" className="glass-panel">
               <div className="panel-header">
                 <h2>WhatsApp Connection</h2>
                 <div className="panel-header-actions">
@@ -1456,7 +1688,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             </div>
             
             {/* Integrations Panel */}
-            <div className="glass-panel" style={{ marginTop: '1.5rem' }}>
+            <div data-tour="integrations-panel" className="glass-panel" style={{ marginTop: '1.5rem' }}>
               <div className="panel-header">
                 <h2>Integrations & Tools</h2>
               </div>
