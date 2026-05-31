@@ -400,6 +400,26 @@ function Dashboard({ session }) {
   const [subscribing, setSubscribing] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
 
+  // Onboarding Tour State
+  const [tourState, setTourState] = useState(() => {
+    return localStorage.getItem('onboarding_completed') ? 'completed' : 'pending';
+  });
+
+  const skipTour = () => {
+    setTourState('completed');
+    localStorage.setItem('onboarding_completed', 'true');
+  };
+
+  useEffect(() => {
+    if (!loading && tourState !== 'completed') {
+      if (tenants.length === 0) {
+        setTourState('step1_add_business');
+      } else if (tenants.length > 0 && (tourState === 'step1_add_business' || tourState === 'step2_fill_modal')) {
+        setTourState('step3_select_business');
+      }
+    }
+  }, [loading, tenants.length, tourState]);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -636,6 +656,9 @@ function Dashboard({ session }) {
           <AddBusinessModal
             onClose={() => setShowAddModal(false)}
             onCreated={handleBusinessCreated}
+            tourState={tourState}
+            setTourState={setTourState}
+            skipTour={skipTour}
           />
         )}
         
@@ -656,7 +679,10 @@ function Dashboard({ session }) {
           <TenantEditor 
             tenant={selectedTenant} 
             onSave={handleSave} 
-            saveStatus={saveStatus} 
+            saveStatus={saveStatus}
+            tourState={tourState}
+            setTourState={setTourState}
+            skipTour={skipTour}
           />
         ) : tenants.length === 0 ? (
           /* Empty State */
@@ -676,14 +702,29 @@ function Dashboard({ session }) {
             <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '1rem', marginBottom: '2rem', lineHeight: '1.6' }}>
               Add your first business and we'll set up an AI-powered WhatsApp receptionist in under 2 minutes.
             </p>
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)} style={{ padding: '12px 28px', fontSize: '1rem', borderRadius: '12px' }}>
-              + Add Your First Business
-            </button>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <button className="btn btn-primary" onClick={() => {
+                setShowAddModal(true);
+                if (tourState === 'step1_add_business') setTourState('step2_fill_modal');
+              }} style={{ padding: '12px 28px', fontSize: '1rem', borderRadius: '12px' }}>
+                + Add Your First Business
+              </button>
+              {tourState === 'step1_add_business' && (
+                <TourTooltip 
+                  title="Step 1: Add a Business"
+                  text="Let's get started! Click here to set up your first AI receptionist."
+                  onSkip={skipTour} position="bottom"
+                />
+              )}
+            </div>
           </div>
         ) : (
           <TenantsList 
             tenants={tenants} 
             onSelect={setSelectedTenant} 
+            tourState={tourState}
+            setTourState={setTourState}
+            skipTour={skipTour}
           />
         )}
       </main>
@@ -694,7 +735,7 @@ function Dashboard({ session }) {
 /* ─────────────────────────────────────────────
    Tenants List (Dashboard Home)
    ───────────────────────────────────────────── */
-function TenantsList({ tenants, onSelect }) {
+function TenantsList({ tenants, onSelect, tourState, setTourState, skipTour }) {
   return (
     <div className="grid">
       {tenants.map((tenant, idx) => (
@@ -713,13 +754,25 @@ function TenantsList({ tenants, onSelect }) {
             <p><strong>Owner:</strong> {tenant.owner_phone || 'Not set'}</p>
           </div>
           
-          <button 
-            className="btn btn-primary" 
-            style={{ width: '100%' }}
-            onClick={() => onSelect(tenant)}
-          >
-            Edit Settings
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button 
+              className="btn btn-primary" 
+              style={{ width: '100%' }}
+              onClick={() => {
+                onSelect(tenant);
+                if (tourState === 'step3_select_business' && idx === 0) setTourState('step4_get_qr');
+              }}
+            >
+              Edit Settings
+            </button>
+            {tourState === 'step3_select_business' && idx === 0 && (
+              <TourTooltip 
+                title="Step 3: Edit Settings"
+                text="Great! Now click here to open the dashboard for this business and connect WhatsApp."
+                onSkip={skipTour} position="top"
+              />
+            )}
+          </div>
         </div>
       ))}
     </div>
@@ -729,7 +782,7 @@ function TenantsList({ tenants, onSelect }) {
 /* ─────────────────────────────────────────────
    Add Business Modal
    ───────────────────────────────────────────── */
-function AddBusinessModal({ onClose, onCreated }) {
+function AddBusinessModal({ onClose, onCreated, tourState, setTourState, skipTour }) {
   const [step, setStep] = useState('form'); // 'form' | 'loading' | 'qr' | 'done'
   const [formData, setFormData] = useState({
     name: '',
@@ -754,6 +807,7 @@ function AddBusinessModal({ onClose, onCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (tourState === 'step2_fill_modal') setTourState('step3_select_business');
     setError('');
     setStep('loading');
 
@@ -864,7 +918,16 @@ function AddBusinessModal({ onClose, onCreated }) {
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                 <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create & Get QR Code</button>
+                <div style={{ position: 'relative' }}>
+                  <button type="submit" className="btn btn-primary">Create & Get QR Code</button>
+                  {tourState === 'step2_fill_modal' && (
+                    <TourTooltip 
+                      title="Step 2: Create Business"
+                      text="Fill in your business name and click Create!"
+                      onSkip={skipTour} position="bottom"
+                    />
+                  )}
+                </div>
               </div>
             </form>
           </>
@@ -1203,194 +1266,64 @@ function KnowledgeBaseView({ tenant }) {
 
 
 /* ─────────────────────────────────────────────
-   Onboarding Tutorial
+   Interactive Tour Tooltip
    ───────────────────────────────────────────── */
-function OnboardingTutorial({ steps, currentStep, onNext, onPrev, onClose }) {
-  const step = steps[currentStep];
-  const [targetRect, setTargetRect] = React.useState(null);
+function TourTooltip({ title, text, onSkip, position = 'bottom', style = {} }) {
+  let posStyles = {};
+  let arrowStyles = {};
+  let pulseStyles = {};
 
-  React.useEffect(() => {
-    const el = document.querySelector(step.target);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => {
-        const rect = el.getBoundingClientRect();
-        setTargetRect(rect);
-      }, 400);
-    } else {
-      setTargetRect(null);
-    }
-  }, [currentStep, step.target]);
-
-  const tooltipStyle = (() => {
-    if (!targetRect) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-    const pad = 16;
-    const tooltipW = 340;
-    // Position below the target by default
-    let top = targetRect.bottom + pad;
-    let left = targetRect.left + targetRect.width / 2 - tooltipW / 2;
-    // If tooltip goes below viewport, position above
-    if (top + 200 > window.innerHeight) {
-      top = targetRect.top - pad - 200;
-    }
-    // Clamp horizontal
-    if (left < pad) left = pad;
-    if (left + tooltipW > window.innerWidth - pad) left = window.innerWidth - pad - tooltipW;
-    return { top: `${top}px`, left: `${left}px` };
-  })();
+  if (position === 'bottom') {
+    posStyles = { top: 'calc(100% + 14px)', left: '50%', transform: 'translateX(-50%)' };
+    arrowStyles = { bottom: '100%', left: '50%', transform: 'translateX(-50%)', borderBottomColor: '#1e293b' };
+    pulseStyles = { top: '-6px', left: '-6px', right: '-6px', bottom: '-6px' };
+  } else if (position === 'top') {
+    posStyles = { bottom: 'calc(100% + 14px)', left: '50%', transform: 'translateX(-50%)' };
+    arrowStyles = { top: '100%', left: '50%', transform: 'translateX(-50%)', borderTopColor: '#1e293b' };
+    pulseStyles = { top: '-6px', left: '-6px', right: '-6px', bottom: '-6px' };
+  } else if (position === 'right') {
+    posStyles = { left: 'calc(100% + 14px)', top: '50%', transform: 'translateY(-50%)' };
+    arrowStyles = { right: '100%', top: '50%', transform: 'translateY(-50%)', borderRightColor: '#1e293b' };
+    pulseStyles = { top: '-6px', left: '-6px', right: '-6px', bottom: '-6px' };
+  }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 10000 }}>
-      {/* Overlay with cutout */}
-      <svg style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-        <defs>
-          <mask id="tour-mask">
-            <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {targetRect && (
-              <rect
-                x={targetRect.left - 8} y={targetRect.top - 8}
-                width={targetRect.width + 16} height={targetRect.height + 16}
-                rx="12" fill="black"
-              />
-            )}
-          </mask>
-        </defs>
-        <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#tour-mask)" />
-      </svg>
-
-      {/* Highlight border */}
-      {targetRect && (
-        <div style={{
-          position: 'fixed',
-          top: targetRect.top - 8, left: targetRect.left - 8,
-          width: targetRect.width + 16, height: targetRect.height + 16,
-          border: '2px solid #6366f1', borderRadius: '12px',
-          boxShadow: '0 0 0 4px rgba(99,102,241,0.3), 0 0 30px rgba(99,102,241,0.2)',
-          pointerEvents: 'none', zIndex: 10001,
-          animation: 'pulse-border 2s ease-in-out infinite'
-        }} />
-      )}
-
-      {/* Click blocker */}
-      <div onClick={(e) => e.stopPropagation()} style={{ position: 'fixed', inset: 0, zIndex: 10001 }} />
-
-      {/* Tooltip */}
+    <>
       <div style={{
-        position: 'fixed', ...tooltipStyle, zIndex: 10002,
-        width: '340px', maxWidth: 'calc(100vw - 32px)',
-        background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-        border: '1px solid rgba(99,102,241,0.4)',
-        borderRadius: '16px', padding: '1.5rem',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-        animation: 'animate-fade-in 0.3s ease'
-      }}>
-        {/* Step counter */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', gap: '4px' }}>
-            {steps.map((_, i) => (
-              <div key={i} style={{
-                width: i === currentStep ? '20px' : '8px', height: '4px',
-                borderRadius: '2px', transition: 'all 0.3s',
-                background: i <= currentStep ? '#6366f1' : 'rgba(255,255,255,0.15)'
-              }} />
-            ))}
-          </div>
-          <button onClick={onClose} style={{
-            background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
-            cursor: 'pointer', fontSize: '1.2rem', padding: '2px 6px', lineHeight: 1
-          }}>✕</button>
-        </div>
-
-        {/* Icon */}
-        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{step.icon}</div>
-
-        {/* Title */}
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', margin: '0 0 0.5rem 0' }}>{step.title}</h3>
-
-        {/* Description */}
-        <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, margin: '0 0 1.25rem 0' }}>{step.description}</p>
-
-        {/* Navigation */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button
-            onClick={onPrev} disabled={currentStep === 0}
-            style={{
-              background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px',
-              color: currentStep === 0 ? 'rgba(255,255,255,0.2)' : '#fff', padding: '8px 16px',
-              cursor: currentStep === 0 ? 'default' : 'pointer', fontSize: '0.85rem', transition: 'all 0.2s'
-            }}
-          >← Back</button>
-
-          {currentStep < steps.length - 1 ? (
-            <button onClick={onNext} style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none', borderRadius: '8px',
-              color: '#fff', padding: '8px 20px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-              boxShadow: '0 4px 15px rgba(99,102,241,0.4)', transition: 'all 0.2s'
-            }}>Next →</button>
-          ) : (
-            <button onClick={onClose} style={{
-              background: 'linear-gradient(135deg, #22c55e, #16a34a)', border: 'none', borderRadius: '8px',
-              color: '#fff', padding: '8px 20px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-              boxShadow: '0 4px 15px rgba(34,197,94,0.4)', transition: 'all 0.2s'
-            }}>Got it! ✓</button>
-          )}
-        </div>
+        position: 'absolute', zIndex: 99, borderRadius: 'inherit',
+        pointerEvents: 'none', animation: 'pulse-border-inline 2s infinite',
+        ...pulseStyles, border: '2px solid #6366f1'
+      }}></div>
+      
+      <div style={{
+        position: 'absolute', ...posStyles, ...style, zIndex: 1000,
+        width: '260px', background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+        border: '1px solid rgba(99,102,241,0.5)', borderRadius: '12px',
+        padding: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+        animation: 'animate-fade-in 0.3s ease', textAlign: 'left',
+        cursor: 'default'
+      }} onClick={(e) => e.stopPropagation()}>
+        <div style={{
+          position: 'absolute', width: 0, height: 0,
+          border: '7px solid transparent', ...arrowStyles
+        }}></div>
+        <h4 style={{ margin: '0 0 0.25rem 0', color: '#fff', fontSize: '0.95rem' }}>{title}</h4>
+        <p style={{ margin: '0 0 0.75rem 0', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.4' }}>{text}</p>
+        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSkip(); }} style={{
+          background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+          cursor: 'pointer', fontSize: '0.75rem', padding: 0, textDecoration: 'underline'
+        }}>Skip tutorial</button>
       </div>
 
       <style>{`
-        @keyframes pulse-border {
-          0%, 100% { box-shadow: 0 0 0 4px rgba(99,102,241,0.3), 0 0 30px rgba(99,102,241,0.15); }
-          50% { box-shadow: 0 0 0 6px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.3); }
+        @keyframes pulse-border-inline {
+          0%, 100% { box-shadow: 0 0 0 0px rgba(99,102,241,0.4); }
+          50% { box-shadow: 0 0 0 8px rgba(99,102,241,0.15); }
         }
       `}</style>
-    </div>
+    </>
   );
 }
-
-const TOUR_STEPS = [
-  {
-    target: '[data-tour="tabs"]',
-    icon: '📋',
-    title: 'Dashboard Tabs',
-    description: 'This is your control center. Use these tabs to switch between the Overview, Live Inbox, Knowledge Base, and AI Settings for your business.'
-  },
-  {
-    target: '[data-tour="whatsapp-panel"]',
-    icon: '📱',
-    title: 'Connect WhatsApp',
-    description: 'Click "Get QR Code" and scan it with the WhatsApp Business app on your phone. This links your phone number to the AI receptionist. The AI will start replying automatically once connected!'
-  },
-  {
-    target: '[data-tour="analytics-panel"]',
-    icon: '📊',
-    title: 'Analytics & ROI',
-    description: 'Track how many customers your AI has talked to, how many messages it has sent, and how much time it has saved you. This updates in real-time!'
-  },
-  {
-    target: '[data-tour="integrations-panel"]',
-    icon: '📞',
-    title: 'Ringl: Missed Call Auto-Reply',
-    description: 'Download and install the Ringl APK on your business phone. When you miss a customer call, it will automatically send them a WhatsApp follow-up via your AI.'
-  },
-  {
-    target: '[data-tour="settings-tab"]',
-    icon: '⚙️',
-    title: 'AI Settings',
-    description: 'Click here to configure your AI — set your business name, owner phone, system prompt, and enable features like Guardrail & Missed Call auto-reply.'
-  },
-  {
-    target: '[data-tour="knowledge-tab"]',
-    icon: '📚',
-    title: 'Knowledge Base',
-    description: 'Upload PDFs or text files (menus, price lists, FAQs) so the AI can answer questions using YOUR real data instead of guessing. This dramatically reduces hallucinations!'
-  },
-  {
-    target: '[data-tour="inbox-tab"]',
-    icon: '💬',
-    title: 'Live Inbox',
-    description: 'See every conversation your AI is having in real-time. Monitor what customers are asking and how the AI is responding. You can jump in and take over anytime!'
-  }
-];
 
 
 /* ─────────────────────────────────────────────
@@ -1553,32 +1486,13 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* Tutorial */}
-      {showTour && (
-        <OnboardingTutorial
-          steps={TOUR_STEPS}
-          currentStep={tourStep}
-          onNext={() => setTourStep(s => Math.min(s + 1, TOUR_STEPS.length - 1))}
-          onPrev={() => setTourStep(s => Math.max(s - 1, 0))}
-          onClose={closeTour}
-        />
-      )}
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-        <div className="tabs" data-tour="tabs" style={{ marginBottom: 0 }}>
+        <div className="tabs" style={{ marginBottom: 0 }}>
           <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>Overview</button>
-          <button data-tour="inbox-tab" className={activeTab === 'inbox' ? 'active' : ''} onClick={() => setActiveTab('inbox')}>Live Inbox</button>
-          <button data-tour="knowledge-tab" className={activeTab === 'knowledge' ? 'active' : ''} onClick={() => setActiveTab('knowledge')}>Knowledge Base</button>
-          <button data-tour="settings-tab" className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>AI Settings</button>
+          <button className={activeTab === 'inbox' ? 'active' : ''} onClick={() => setActiveTab('inbox')}>Live Inbox</button>
+          <button className={activeTab === 'knowledge' ? 'active' : ''} onClick={() => setActiveTab('knowledge')}>Knowledge Base</button>
+          <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>AI Settings</button>
         </div>
-        <button onClick={() => { setTourStep(0); setShowTour(true); }} style={{
-          background: 'none', border: '1px solid rgba(99,102,241,0.3)', borderRadius: '8px',
-          color: '#a5b4fc', cursor: 'pointer', padding: '5px 12px', fontSize: '0.78rem',
-          display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.2s', whiteSpace: 'nowrap'
-        }}
-        onMouseOver={e => e.currentTarget.style.borderColor = '#6366f1'}
-        onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'}
-        >❓ Tour</button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '0.5rem' }}>
@@ -1590,7 +1504,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
         {activeTab === 'overview' && (
           <>
             {/* Analytics & ROI Panel */}
-            <div data-tour="analytics-panel" className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(88, 166, 255, 0.05) 0%, rgba(30, 41, 59, 0.5) 100%)', borderColor: 'rgba(88, 166, 255, 0.2)' }}>
+            <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(88, 166, 255, 0.05) 0%, rgba(30, 41, 59, 0.5) 100%)', borderColor: 'rgba(88, 166, 255, 0.2)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <h2>Analytics & ROI</h2>
                 <button className="btn btn-secondary" onClick={fetchAnalytics} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
@@ -1627,7 +1541,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             </div>
             
             {/* WhatsApp Connection Panel */}
-            <div data-tour="whatsapp-panel" className="glass-panel">
+            <div className="glass-panel">
               <div className="panel-header">
                 <h2>WhatsApp Connection</h2>
                 <div className="panel-header-actions">
@@ -1657,7 +1571,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
                     )}
 
                     {qrData && qrData !== 'error' && !qrLoading && (
-                      <div className="qr-container">
+                      <div className="qr-container" style={{ position: 'relative' }}>
                         {qrData.startsWith('data:') ? (
                           <img src={qrData} alt="WhatsApp QR Code" className="qr-image" />
                         ) : qrData.length > 20 ? (
@@ -1668,6 +1582,13 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
                             <p style={{ color: '#000', fontSize: '2rem', fontWeight: 700, letterSpacing: '4px' }}>{qrData}</p>
                           </div>
                         )}
+                        {tourState === 'step5_scan_qr' && (
+                          <TourTooltip 
+                            title="Step 5: Scan & Finish!"
+                            text="Open WhatsApp Business on your phone, go to Linked Devices, and scan this QR code. You're all set!"
+                            onSkip={skipTour} position="right"
+                          />
+                        )}
                       </div>
                     )}
 
@@ -1677,10 +1598,20 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '1rem' }}>
-                      <button className="btn btn-primary" onClick={fetchQrCode}>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '1rem', position: 'relative' }}>
+                      <button className="btn btn-primary" onClick={() => {
+                        fetchQrCode();
+                        if (tourState === 'step4_get_qr') setTourState('step5_scan_qr');
+                      }}>
                         {qrData ? 'Refresh QR Code' : 'Get QR Code'}
                       </button>
+                      {tourState === 'step4_get_qr' && (
+                        <TourTooltip 
+                          title="Step 4: Generate QR"
+                          text="Click here to fetch your connection QR code."
+                          onSkip={skipTour} position="bottom"
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1688,7 +1619,7 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
             </div>
             
             {/* Integrations Panel */}
-            <div data-tour="integrations-panel" className="glass-panel" style={{ marginTop: '1.5rem' }}>
+            <div className="glass-panel" style={{ marginTop: '1.5rem' }}>
               <div className="panel-header">
                 <h2>Integrations & Tools</h2>
               </div>
