@@ -414,7 +414,7 @@ function Dashboard({ session }) {
     if (!loading && tourState !== 'completed') {
       if (tenants.length === 0) {
         setTourState('step1_add_business');
-      } else if (tenants.length > 0 && (tourState === 'step1_add_business' || tourState === 'step2_fill_modal')) {
+      } else if (tenants.length > 0 && (tourState === 'pending' || tourState === 'step1_add_business' || tourState === 'step2_fill_modal')) {
         setTourState('step3_select_business');
       }
     }
@@ -1329,7 +1329,7 @@ function TourTooltip({ title, text, onSkip, position = 'bottom', style = {} }) {
 /* ─────────────────────────────────────────────
    Tenant Editor
    ───────────────────────────────────────────── */
-function TenantEditor({ tenant, onSave, saveStatus }) {
+function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, skipTour }) {
   const [formData, setFormData] = useState({ ...tenant });
   const [qrData, setQrData] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
@@ -1347,29 +1347,9 @@ function TenantEditor({ tenant, onSave, saveStatus }) {
   const [wizardLoading, setWizardLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Tutorial state
-  const [showTour, setShowTour] = useState(false);
-  const [tourStep, setTourStep] = useState(0);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Auto-show tutorial for new users (no messages yet / first visit)
-  useEffect(() => {
-    const tourSeen = localStorage.getItem(`tour_seen_${tenant.id}`);
-    if (!tourSeen) {
-      // Small delay so UI renders first
-      const timer = setTimeout(() => setShowTour(true), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [tenant.id]);
-
-  const closeTour = () => {
-    setShowTour(false);
-    setTourStep(0);
-    localStorage.setItem(`tour_seen_${tenant.id}`, 'true');
   };
 
   const handleSubmit = (e) => {
