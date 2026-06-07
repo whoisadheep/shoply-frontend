@@ -207,9 +207,9 @@ function LoginScreen({ onBack }) {
   };
 
   return (
-    <div className="login-container" style={{ position: 'relative', overflowY: 'auto', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '4rem 2rem' }}>
+    <div className="login-container" style={{ position: 'relative', overflowY: 'auto', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: mode === 'signup' ? 'flex-start' : 'center', padding: mode === 'signup' ? '4rem 2rem' : '2rem' }}>
       <MeshBackground />
-      <div className="glass-panel login-card animate-fade-in" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '560px', margin: 'auto' }}>
+      <div className="clay-panel login-card animate-fade-in" style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '560px', margin: 'auto' }}>
         
         {/* Provisioning spinner */}
         {step === 'provisioning' && (
@@ -535,20 +535,20 @@ function Dashboard({ session }) {
   const daysLeft = isTrialActive ? Math.max(0, Math.ceil((new Date(subscription.trial_ends_at) - new Date()) / 86400000)) : 0;
 
   if (loading) return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '1.5rem', background: 'var(--bg-color)' }}>
       <div className="spinner"></div>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', letterSpacing: '0.05em' }}>Loading your dashboard...</p>
     </div>
   );
 
   if (error) return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '1rem', padding: '2rem' }}>
-      <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⚠️</div>
-      <h2 style={{ color: '#fff', fontSize: '1.25rem' }}>Something went wrong</h2>
+    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', gap: '1rem', padding: '2rem', background: 'var(--bg-color)' }}>
+      <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(229,77,77,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', boxShadow: 'var(--clay-shadow-sm)' }}>⚠️</div>
+      <h2 style={{ color: 'var(--text-primary)', fontSize: '1.25rem' }}>Something went wrong</h2>
       <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '400px', fontSize: '0.9rem' }}>{error}</p>
       <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
         <button className="btn btn-primary" onClick={() => { setError(null); fetchData(); }}>Try Again</button>
-        <button className="btn" onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff' }}>Logout / Clear Session</button>
+        <button className="btn btn-secondary" onClick={handleLogout}>Logout / Clear Session</button>
       </div>
     </div>
   );
@@ -558,23 +558,20 @@ function Dashboard({ session }) {
       {/* ── Top Navigation Bar ── */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(9,9,11,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--panel-border)',
+        background: 'var(--panel-bg)', 
+        boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
         padding: '0 2rem', height: '64px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {selectedTenant && (
-            <button onClick={() => setSelectedTenant(null)} style={{
-              background: 'none', border: '1px solid var(--panel-border)', borderRadius: '8px',
-              color: 'var(--text-secondary)', cursor: 'pointer', padding: '6px 10px', fontSize: '0.85rem',
-              display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.15s ease'
+            <button onClick={() => setSelectedTenant(null)} className="btn btn-secondary" style={{
+              padding: '6px 12px', fontSize: '0.85rem',
+              display: 'flex', alignItems: 'center', gap: '4px'
             }}
-            onMouseOver={e => e.currentTarget.style.borderColor = '#52525b'}
-            onMouseOut={e => e.currentTarget.style.borderColor = 'var(--panel-border)'}
             >← Back</button>
           )}
-          <span style={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff', letterSpacing: '-0.03em' }}>
+          <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
             Shoply<span style={{ fontWeight: 400, color: 'var(--text-secondary)', marginLeft: '4px' }}>AI</span>
           </span>
         </div>
@@ -588,13 +585,14 @@ function Dashboard({ session }) {
           <div style={{ position: 'relative' }}>
             <button onClick={handleLogout} style={{
               width: '36px', height: '36px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none',
+              background: 'var(--accent-gradient)', border: 'none',
               color: '#fff', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              boxShadow: 'var(--clay-shadow-sm)'
             }}
-            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.3)'; }}
-            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; }}
             title="Sign Out"
             >{userInitial}</button>
           </div>
@@ -607,18 +605,17 @@ function Dashboard({ session }) {
         {/* Subscription Banner */}
         {isTrialActive && (
           <div className="animate-fade-in subscription-banner" style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08))',
-            border: '1px solid rgba(99,102,241,0.2)'
+            background: 'rgba(255, 107, 107, 0.06)'
           }}>
             <div className="subscription-banner-text">
               <span style={{ fontSize: '1.2rem' }}>✨</span>
               <div>
-                <p style={{ color: '#c4b5fd', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Free Trial · {daysLeft} day{daysLeft !== 1 ? 's' : ''} left</p>
+                <p style={{ color: 'var(--accent-color)', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Free Trial · {daysLeft} day{daysLeft !== 1 ? 's' : ''} left</p>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Subscribe to keep your AI assistant running uninterrupted.</p>
               </div>
             </div>
             <button className="btn-subscribe" onClick={() => setShowPricingModal(true)} disabled={subscribing} style={{
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              background: 'var(--accent-gradient)',
               opacity: subscribing ? 0.7 : 1
             }}>{subscribing ? 'Loading...' : 'Upgrade Plan'}</button>
           </div>
@@ -626,17 +623,17 @@ function Dashboard({ session }) {
 
         {isTrialExpired && (
           <div className="animate-fade-in subscription-banner" style={{
-            background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)'
+            background: 'rgba(229,77,77,0.06)'
           }}>
             <div className="subscription-banner-text">
               <span style={{ fontSize: '1.2rem' }}>⏸️</span>
               <div>
-                <p style={{ color: '#fca5a5', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Trial Expired</p>
+                <p style={{ color: 'var(--danger-color)', fontSize: '0.85rem', margin: 0, fontWeight: 500 }}>Trial Expired</p>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0 }}>Your AI responses are paused. Subscribe to reactivate instantly.</p>
               </div>
             </div>
             <button className="btn-subscribe" onClick={() => setShowPricingModal(true)} disabled={subscribing} style={{
-              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              background: 'linear-gradient(135deg, var(--danger-color), #C0392B)',
               opacity: subscribing ? 0.7 : 1
             }}>{subscribing ? 'Loading...' : 'Upgrade Plan'}</button>
           </div>
@@ -692,13 +689,12 @@ function Dashboard({ session }) {
           }}>
             <div style={{
               width: '90px', height: '90px', borderRadius: '24px',
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(236,72,153,0.15))',
-              border: '1px solid rgba(236,72,153,0.2)',
-              boxShadow: '0 10px 30px -10px rgba(236,72,153,0.3)',
+              background: 'var(--accent-light)',
+              boxShadow: 'var(--clay-shadow)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '2.5rem', marginBottom: '1.5rem'
             }}>🚀</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.75rem', color: '#fff' }}>No businesses yet</h2>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>No businesses yet</h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '1rem', marginBottom: '2rem', lineHeight: '1.6' }}>
               Add your first business and we'll set up an AI-powered WhatsApp receptionist in under 2 minutes.
             </p>
@@ -741,7 +737,7 @@ function TenantsList({ tenants, onSelect, tourState, setTourState, skipTour }) {
       {tenants.map((tenant, idx) => (
         <div 
           key={tenant.id} 
-          className="glass-panel hover-lift animate-fade-in"
+          className="clay-panel hover-lift animate-fade-in"
           style={{ animationDelay: `${idx * 0.1}s` }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -861,7 +857,7 @@ function AddBusinessModal({ onClose, onCreated, tourState, setTourState, skipTou
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="glass-panel modal-content animate-fade-in">
+      <div className="clay-panel modal-content animate-fade-in">
         
         {/* Step 1: Form */}
         {step === 'form' && (
@@ -1071,7 +1067,7 @@ function InboxView({ tenant }) {
   return (
     <div className={`inbox-layout ${activeCustomer ? 'chat-open' : ''}`}>
       <div className="customer-sidebar">
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--panel-border)', fontWeight: 600 }}>
+        <div style={{ padding: '1rem', borderBottom: '2px solid rgba(0,0,0,0.05)', fontWeight: 600, color: 'var(--text-primary)' }}>
           Customers ({customers.length})
         </div>
         <div className="customer-list">
@@ -1222,7 +1218,7 @@ function KnowledgeBaseView({ tenant }) {
   };
 
   return (
-    <div className="glass-panel">
+    <div className="clay-panel">
       <div className="panel-header">
         <div>
           <h2 style={{ marginBottom: '0.25rem' }}>Knowledge Base</h2>
@@ -1241,19 +1237,19 @@ function KnowledgeBaseView({ tenant }) {
       )}
 
       {documents.length === 0 ? (
-        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px dashed var(--panel-border)' }}>
+        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)', background: 'var(--panel-bg-light)', borderRadius: '14px', border: '2px dashed rgba(0,0,0,0.08)', boxShadow: 'var(--clay-inset)' }}>
           <p>No documents uploaded yet.</p>
           <p style={{ fontSize: '0.8rem' }}>Upload your menus, pricing guides, FAQs, or policies.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {documents.map(doc => (
-            <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--panel-border)' }}>
+            <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--panel-bg-light)', borderRadius: '14px', boxShadow: 'var(--clay-shadow-sm)' }}>
               <div>
                 <div style={{ fontWeight: 600 }}>{doc.filename}</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Uploaded {new Date(doc.created_at).toLocaleDateString()}</div>
               </div>
-              <button className="btn btn-secondary" style={{ padding: '6px 12px', color: 'var(--danger-color)', borderColor: 'rgba(248,81,73,0.3)' }} onClick={() => handleDelete(doc.id)}>
+              <button className="btn btn-secondary" style={{ padding: '6px 12px', color: 'var(--danger-color)' }} onClick={() => handleDelete(doc.id)}>
                 Delete
               </button>
             </div>
@@ -1275,15 +1271,15 @@ function TourTooltip({ title, text, onSkip, position = 'bottom', style = {} }) {
 
   if (position === 'bottom') {
     posStyles = { top: 'calc(100% + 14px)', left: '50%', transform: 'translateX(-50%)' };
-    arrowStyles = { bottom: '100%', left: '50%', transform: 'translateX(-50%)', borderBottomColor: '#1e293b' };
+    arrowStyles = { bottom: '100%', left: '50%', transform: 'translateX(-50%)', borderBottomColor: 'var(--panel-bg)' };
     pulseStyles = { top: '-6px', left: '-6px', right: '-6px', bottom: '-6px' };
   } else if (position === 'top') {
     posStyles = { bottom: 'calc(100% + 14px)', left: '50%', transform: 'translateX(-50%)' };
-    arrowStyles = { top: '100%', left: '50%', transform: 'translateX(-50%)', borderTopColor: '#1e293b' };
+    arrowStyles = { top: '100%', left: '50%', transform: 'translateX(-50%)', borderTopColor: 'var(--panel-bg)' };
     pulseStyles = { top: '-6px', left: '-6px', right: '-6px', bottom: '-6px' };
   } else if (position === 'right') {
     posStyles = { left: 'calc(100% + 14px)', top: '50%', transform: 'translateY(-50%)' };
-    arrowStyles = { right: '100%', top: '50%', transform: 'translateY(-50%)', borderRightColor: '#1e293b' };
+    arrowStyles = { right: '100%', top: '50%', transform: 'translateY(-50%)', borderRightColor: 'var(--panel-bg)' };
     pulseStyles = { top: '-6px', left: '-6px', right: '-6px', bottom: '-6px' };
   }
 
@@ -1292,14 +1288,14 @@ function TourTooltip({ title, text, onSkip, position = 'bottom', style = {} }) {
       <div style={{
         position: 'absolute', zIndex: 99, borderRadius: 'inherit',
         pointerEvents: 'none', animation: 'pulse-border-inline 2s infinite',
-        ...pulseStyles, border: '2px solid #6366f1'
+        ...pulseStyles, border: '2px solid var(--accent-color)'
       }}></div>
       
       <div style={{
         position: 'absolute', ...posStyles, ...style, zIndex: 1000,
-        width: '260px', background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-        border: '1px solid rgba(99,102,241,0.5)', borderRadius: '12px',
-        padding: '1rem', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+        width: '260px', background: 'var(--panel-bg)',
+        borderRadius: '16px',
+        padding: '1rem', boxShadow: 'var(--clay-shadow-lg)',
         animation: 'animate-fade-in 0.3s ease', textAlign: 'left',
         cursor: 'default'
       }} onClick={(e) => e.stopPropagation()}>
@@ -1307,18 +1303,18 @@ function TourTooltip({ title, text, onSkip, position = 'bottom', style = {} }) {
           position: 'absolute', width: 0, height: 0,
           border: '7px solid transparent', ...arrowStyles
         }}></div>
-        <h4 style={{ margin: '0 0 0.25rem 0', color: '#fff', fontSize: '0.95rem' }}>{title}</h4>
+        <h4 style={{ margin: '0 0 0.25rem 0', color: 'var(--text-primary)', fontSize: '0.95rem' }}>{title}</h4>
         <p style={{ margin: '0 0 0.75rem 0', color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.4' }}>{text}</p>
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSkip(); }} style={{
-          background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+          background: 'none', border: 'none', color: 'var(--text-muted)',
           cursor: 'pointer', fontSize: '0.75rem', padding: 0, textDecoration: 'underline'
         }}>Skip tutorial</button>
       </div>
 
       <style>{`
         @keyframes pulse-border-inline {
-          0%, 100% { box-shadow: 0 0 0 0px rgba(99,102,241,0.4); }
-          50% { box-shadow: 0 0 0 8px rgba(99,102,241,0.15); }
+          0%, 100% { box-shadow: 0 0 0 0px rgba(255,107,107,0.4); }
+          50% { box-shadow: 0 0 0 8px rgba(255,107,107,0.15); }
         }
       `}</style>
     </>
@@ -1334,6 +1330,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
   const [qrData, setQrData] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
   const [analytics, setAnalytics] = useState(null);
 
   // Prompt Wizard state
@@ -1437,12 +1434,15 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
   };
 
   const checkStatus = async () => {
+    setStatusLoading(true);
     try {
       const response = await apiFetch(`${API_BASE_URL}/tenants/${tenant.id}/status`);
       const data = await response.json();
       setConnectionStatus(data?.instance?.state || 'unknown');
     } catch (err) {
       setConnectionStatus('offline');
+    } finally {
+      setTimeout(() => setStatusLoading(false), 500); // Ensure the animation plays long enough to be seen
     }
   };
 
@@ -1484,7 +1484,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
         {activeTab === 'overview' && (
           <>
             {/* Analytics & ROI Panel */}
-            <div className="glass-panel" style={{ background: 'linear-gradient(135deg, rgba(88, 166, 255, 0.05) 0%, rgba(30, 41, 59, 0.5) 100%)', borderColor: 'rgba(88, 166, 255, 0.2)' }}>
+            <div className="clay-panel" style={{ background: 'var(--panel-bg)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <h2>Analytics & ROI</h2>
                 <button className="btn btn-secondary" onClick={fetchAnalytics} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
@@ -1521,15 +1521,18 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
             </div>
             
             {/* WhatsApp Connection Panel */}
-            <div className="glass-panel">
+            <div className="clay-panel">
               <div className="panel-header">
                 <h2>WhatsApp Connection</h2>
                 <div className="panel-header-actions">
                   <span className={`badge ${connectionStatus === 'open' ? 'badge-active' : 'badge-offline'}`}>
                     {connectionStatus === 'open' ? '● Connected' : connectionStatus === 'unknown' ? '● Unknown' : '● Disconnected'}
                   </span>
-                  <button className="btn btn-secondary" onClick={checkStatus} style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
-                    Refresh Status
+                  <button className="btn btn-secondary" onClick={checkStatus} style={{ padding: '4px 10px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }} disabled={statusLoading}>
+                    <svg style={{ animation: statusLoading ? 'spin 1s linear infinite' : 'none' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21l-5.46-5.46"/>
+                    </svg>
+                    {statusLoading ? 'Refreshing...' : 'Refresh Status'}
                   </button>
                 </div>
               </div>
@@ -1599,7 +1602,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
             </div>
             
             {/* Integrations Panel */}
-            <div className="glass-panel" style={{ marginTop: '1.5rem' }}>
+            <div className="clay-panel" style={{ marginTop: '1.5rem' }}>
               <div className="panel-header">
                 <h2>Integrations & Tools</h2>
               </div>
@@ -1622,7 +1625,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
         )}
 
         {activeTab === 'settings' && (
-          <div className="glass-panel">
+          <div className="clay-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <h2>AI Settings</h2>
               {saveStatus && (
@@ -1638,8 +1641,8 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
             <form onSubmit={handleSubmit}>
               
               {/* Feature Toggles */}
-              <div className="glass-panel" style={{ marginBottom: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', padding: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Feature Controls</h3>
+              <div className="clay-panel" style={{ marginBottom: '1.5rem', padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '2px solid rgba(0,0,0,0.05)', paddingBottom: '0.5rem' }}>Feature Controls</h3>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'space-between' }}>
@@ -1647,8 +1650,8 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
                       <div style={{ fontWeight: '600', fontSize: '1rem' }}>Shoply AI Assistant</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Automatically read and reply to incoming customer messages.</div>
                     </div>
-                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.ai_enabled !== false ? 'var(--primary-color)' : 'var(--bg-card-hover)', borderRadius: '13px', transition: 'all 0.3s' }}>
-                      <div style={{ position: 'absolute', top: '3px', left: formData.ai_enabled !== false ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s' }}></div>
+                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.ai_enabled !== false ? 'var(--accent-color)' : 'var(--bg-secondary)', borderRadius: '13px', transition: 'all 0.3s', boxShadow: 'var(--clay-inset)' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: formData.ai_enabled !== false ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}></div>
                       <input type="checkbox" name="ai_enabled" checked={formData.ai_enabled !== false} onChange={(e) => setFormData(prev => ({ ...prev, ai_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
                     </div>
                   </label>
@@ -1658,8 +1661,8 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
                       <div style={{ fontWeight: '600', fontSize: '1rem' }}>Ringl Auto-Reply (Missed Calls)</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Send automatic WhatsApp follow-ups when you miss a phone call.</div>
                     </div>
-                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.ringl_enabled !== false ? 'var(--primary-color)' : 'var(--bg-card-hover)', borderRadius: '13px', transition: 'all 0.3s' }}>
-                      <div style={{ position: 'absolute', top: '3px', left: formData.ringl_enabled !== false ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s' }}></div>
+                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.ringl_enabled !== false ? 'var(--accent-color)' : 'var(--bg-secondary)', borderRadius: '13px', transition: 'all 0.3s', boxShadow: 'var(--clay-inset)' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: formData.ringl_enabled !== false ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}></div>
                       <input type="checkbox" name="ringl_enabled" checked={formData.ringl_enabled !== false} onChange={(e) => setFormData(prev => ({ ...prev, ringl_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
                     </div>
                   </label>
@@ -1669,14 +1672,14 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
                       <div style={{ fontWeight: '600', fontSize: '1rem' }}>Strict Safety Guardrail (Self-Healing)</div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Uses a secondary AI to block hallucinations and automatically learn from mistakes. <br/><span style={{ color: 'var(--warning-color)', fontSize: '0.75rem' }}>Note: Adds ~2s delay to AI replies.</span></div>
                     </div>
-                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.guardrail_enabled ? 'var(--primary-color)' : 'var(--bg-card-hover)', borderRadius: '13px', transition: 'all 0.3s' }}>
-                      <div style={{ position: 'absolute', top: '3px', left: formData.guardrail_enabled ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s' }}></div>
+                    <div style={{ position: 'relative', width: '50px', height: '26px', background: formData.guardrail_enabled ? 'var(--accent-color)' : 'var(--bg-secondary)', borderRadius: '13px', transition: 'all 0.3s', boxShadow: 'var(--clay-inset)' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: formData.guardrail_enabled ? '27px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}></div>
                       <input type="checkbox" name="guardrail_enabled" checked={formData.guardrail_enabled || false} onChange={(e) => setFormData(prev => ({ ...prev, guardrail_enabled: e.target.checked }))} style={{ opacity: 0, width: 0, height: 0 }} />
                     </div>
                   </label>
 
                   {formData.guardrail_enabled && (
-                    <div className="form-group animate-fade-in" style={{ marginTop: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+                    <div className="form-group animate-fade-in" style={{ marginTop: '0.5rem', background: 'var(--panel-bg-light)', padding: '1rem', borderRadius: '14px', boxShadow: 'var(--clay-inset)' }}>
                       <label className="form-label">AI Lessons Learned (Auto-Generated)</label>
                       <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', marginTop: 0 }}>
                         When the Guardrail catches a mistake, it writes a rule here so the AI never makes it again. You can edit or delete these rules.
@@ -1684,7 +1687,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
                       <textarea 
                         className="form-control" name="learned_rules"
                         value={formData.learned_rules || ''} onChange={(e) => setFormData(prev => ({ ...prev, learned_rules: e.target.value }))}
-                        style={{ minHeight: '80px', fontFamily: 'monospace', fontSize: '0.85rem', borderColor: 'rgba(255,255,255,0.1)' }}
+                        style={{ minHeight: '80px', fontFamily: 'monospace', fontSize: '0.85rem' }}
                         placeholder="No rules learned yet..."
                       />
                     </div>
@@ -1719,7 +1722,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
               </div>
 
               {/* AI Prompt Wizard */}
-              <div className="glass-panel" style={{ marginBottom: '1.5rem', background: 'rgba(88, 166, 255, 0.05)', border: '1px solid rgba(88, 166, 255, 0.2)' }}>
+              <div className="clay-panel" style={{ marginBottom: '1.5rem', background: 'var(--panel-bg)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>AI Prompt Wizard</h3>
@@ -1799,7 +1802,7 @@ function TenantEditor({ tenant, onSave, saveStatus, tourState, setTourState, ski
               </div>
 
               <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between' }}>
-                <button type="button" className="btn btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem', color: 'var(--danger-color)', borderColor: 'rgba(239, 68, 68, 0.3)' }} onClick={handleDelete}>
+                <button type="button" className="btn btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem', color: 'var(--danger-color)' }} onClick={handleDelete}>
                   Delete Business
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}>
