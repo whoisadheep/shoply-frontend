@@ -529,6 +529,8 @@ textarea.form-control {
 @media (max-width: 768px) {
   .inbox-layout {
     grid-template-columns: 1fr;
+    height: calc(100vh - 220px);
+    min-height: 400px;
   }
   .inbox-layout.chat-open .customer-sidebar { display: none; }
   .inbox-layout:not(.chat-open) .chat-pane { display: none; }
@@ -547,6 +549,7 @@ textarea.form-control {
 .customer-list {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .customer-item {
@@ -612,6 +615,7 @@ textarea.form-control {
   flex: 1;
   padding: 1.5rem;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 1rem;
