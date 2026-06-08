@@ -74,14 +74,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--text-muted);
+  background: var(--accent-color);
   border-radius: 10px;
   border: 3px solid transparent;
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--accent-hover);
   border: 3px solid transparent;
   background-clip: padding-box;
 }
