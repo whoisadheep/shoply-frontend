@@ -540,6 +540,8 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
   background: var(--panel-bg-light);
+  overflow: hidden;
+  height: 100%;
 }
 
 .customer-list {
@@ -593,6 +595,8 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
   background: var(--bg-color);
+  overflow: hidden;
+  height: 100%;
 }
 
 .chat-header {
